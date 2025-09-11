@@ -14,18 +14,15 @@ import {
 } from '@/components/ui/sidebar';
 import {
   LayoutDashboard,
-  AreaChart,
-  FileText,
   Settings,
-  Bot,
-  CandlestickChart,
-  Link2,
   UserCircle,
   LogOut,
   ChevronRight,
   PieChart,
   View,
-  BarChart,
+  BarChart, 
+  Scan,
+  Beaker
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -36,12 +33,8 @@ const menuItems = [
   { href: '/portfolio-glance', label: 'سبد در یک نگاه', icon: PieChart },
   { href: '/market-and-options', label: 'دیده‌بان و زنجیره آپشن', icon: View },
   { href: '/statistical-analysis', label: 'تحلیلهای آماری و سنتیمنت بازار', icon: BarChart },
-  { href: '/strategy-builder', label: 'استراتژی ساز', icon: CandlestickChart },
-  { href: '/pnl/pf-001', label: 'گزارش سود و زیان', icon: AreaChart },
-  { href: '/orders', label: 'سفارشات', icon: FileText },
-  { href: '/bots', label: 'ربات‌ها', icon: Bot },
-  { href: '/settings', label: 'تنظیمات', icon: Settings },
-  { href: '/profile', label: 'پروفایل', icon: UserCircle },
+  { href: '/scanner-and-leaders', label: 'اسکنر و برترین های بازار', icon: Scan },
+  { href: '/simulation', label: 'شبیه سازی', icon: Beaker },
 ];
 
 export function AppSidebar() {
@@ -90,6 +83,20 @@ export function AppSidebar() {
       <SidebarSeparator />
       <SidebarFooter className="p-2">
           <SidebarMenu>
+              <SidebarMenuItem>
+                 <SidebarMenuButton
+                    asChild
+                     tooltip={{
+                        children: 'تنظیمات',
+                        className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
+                     }}
+                 >
+                    <Link href="/settings">
+                        <Settings className="shrink-0" />
+                        <span>تنظیمات</span>
+                    </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                  <SidebarMenuButton
                     asChild

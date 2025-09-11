@@ -77,7 +77,7 @@ export function StatisticalTab() {
                       <ChartTooltip content={<ChartTooltipContent />} />
                       <ChartLegend />
                   </PieChart>
-              </Container>
+              </ChartContainer>
             </div>
           </div>
         </CardContent>
