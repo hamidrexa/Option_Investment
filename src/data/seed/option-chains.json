@@ -1,0 +1,61 @@
+{
+  "TSLA": {
+    "underlying": {
+      "symbol": "TSLA",
+      "name": "Tesla, Inc.",
+      "lastPrice": 177.46,
+      "closePrice": 174.95,
+      "timestamp": "2024-05-20T16:00:00Z"
+    },
+    "contracts": [
+      {
+        "id": "tsla-c-170-241220",
+        "underlying": "TSLA",
+        "strike": 170,
+        "expiry": "2024-12-20",
+        "type": "call",
+        "last": 20.90,
+        "bid": 20.85,
+        "ask": 20.95,
+        "openInterest": 15000,
+        "impliedVol": 0.55,
+        "delta": 0.65,
+        "gamma": 0.015,
+        "theta": -0.05,
+        "vega": 0.35
+      },
+      {
+        "id": "tsla-p-170-241220",
+        "underlying": "TSLA",
+        "strike": 170,
+        "expiry": "2024-12-20",
+        "type": "put",
+        "last": 13.50,
+        "bid": 13.45,
+        "ask": 13.55,
+        "openInterest": 12000,
+        "impliedVol": 0.54,
+        "delta": -0.35,
+        "gamma": 0.015,
+        "theta": -0.045,
+        "vega": 0.35
+      },
+      {
+        "id": "tsla-c-200-241220",
+        "underlying": "TSLA",
+        "strike": 200,
+        "expiry": "2024-12-20",
+        "type": "call",
+        "last": 18.75,
+        "bid": 18.70,
+        "ask": 18.80,
+        "openInterest": 25000,
+        "impliedVol": 0.58,
+        "delta": 0.50,
+        "gamma": 0.012,
+        "theta": -0.06,
+        "vega": 0.40
+      }
+    ]
+  }
+}

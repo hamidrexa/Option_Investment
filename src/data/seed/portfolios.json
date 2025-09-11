@@ -1,0 +1,62 @@
+[
+  {
+    "id": "pf-001",
+    "name": "Aggressive Growth Tech",
+    "totalValue": 1258340.75,
+    "cash": 150000.00,
+    "marginUsed": 45000.00,
+    "totalPnL": 88450.25,
+    "totalPnLPercent": 7.56,
+    "timestamp": "2024-05-20T16:00:00Z",
+    "positions": [
+      {
+        "id": "pos-001",
+        "symbol": "NVDA",
+        "instrumentType": "underlying",
+        "quantity": 100,
+        "avgCost": 905.50,
+        "marketPrice": 950.25,
+        "marketValue": 95025.00,
+        "unrealizedPnl": 4475.00,
+        "realizedPnl": 12000.00,
+        "greeks": { "delta": 100, "gamma": 0, "theta": 0, "vega": 0 },
+        "portfolioAllocation": 7.55
+      },
+      {
+        "id": "pos-002",
+        "symbol": "TSLA C 200 24/12/20",
+        "instrumentType": "option",
+        "underlying": "TSLA",
+        "strike": 200,
+        "expiry": "2024-12-20",
+        "optionType": "call",
+        "quantity": 50,
+        "avgCost": 15.50,
+        "marketPrice": 18.75,
+        "marketValue": 93750.00,
+        "unrealizedPnl": 16250.00,
+        "realizedPnl": 0,
+        "greeks": { "delta": 25, "gamma": 0.8, "theta": -55, "vega": 120 },
+        "portfolioAllocation": 7.45
+      },
+      {
+        "id": "pos-003",
+        "symbol": "AAPL P 180 24/09/20",
+        "instrumentType": "option",
+        "underlying": "AAPL",
+        "strike": 180,
+        "expiry": "2024-09-20",
+        "optionType": "put",
+        "quantity": -20,
+        "avgCost": 5.20,
+        "marketPrice": 4.10,
+        "marketValue": -8200.00,
+        "unrealizedPnl": 2200.00,
+        "realizedPnl": 500,
+        "greeks": { "delta": 8.4, "gamma": -0.2, "theta": 15, "vega": -30 },
+        "portfolioAllocation": -0.65
+      }
+    ],
+    "strategies": []
+  }
+]
