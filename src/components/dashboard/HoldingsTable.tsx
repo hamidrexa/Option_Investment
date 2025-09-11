@@ -100,7 +100,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              ستون‌ها <ChevronDown className="mr-2 h-4 w-4" />
+              ستون‌ها <ChevronDown className="ml-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -111,7 +111,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
                 return (
                   <DropdownMenuCheckboxItem
                     key={column.id}
-                    className="capitalize"
+                    className="capitalize text-right"
                     checked={column.getIsVisible()}
                     onCheckedChange={(value) =>
                       column.toggleVisibility(!!value)
@@ -131,7 +131,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id} style={{ width: `${header.getSize()}px` }}>
+                    <TableHead key={header.id} style={{ width: `${header.getSize()}px` }} className="text-right">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -152,7 +152,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
                   data-state={row.getIsSelected() && "selected"}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="text-right">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -175,7 +175,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
         </Table>
       </div>
       <div className="flex items-center justify-end space-x-2 py-4 space-x-reverse">
-         <div className="flex-1 text-sm text-muted-foreground">
+         <div className="flex-1 text-sm text-muted-foreground text-right">
           {table.getFilteredSelectedRowModel().rows.length} از {" "}
           {table.getFilteredRowModel().rows.length} سطر(ها) انتخاب شده.
         </div>

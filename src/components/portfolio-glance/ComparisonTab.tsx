@@ -21,7 +21,7 @@ const formatPercent = (value: number) => `${value.toFixed(2)}%`;
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-background border border-border p-3 rounded-lg shadow-lg">
+      <div className="bg-background border border-border p-3 rounded-lg shadow-lg text-right">
         <p className="font-bold mb-2">{label}</p>
         <p style={{ color: payload[0].color }}>
           {`بازدهی پرتفو: ${formatPercent(payload[0].value)}`}
@@ -44,7 +44,7 @@ const detailsData = [
 export default function ComparisonTab() {
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="text-right">
         <CardHeader>
           <CardTitle>مقایسه تاریخی بازدهی پرتفو و شاخص کل</CardTitle>
         </CardHeader>
@@ -62,7 +62,7 @@ export default function ComparisonTab() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="text-right">
         <CardHeader>
           <CardTitle>جدول جزئیات بازدهی</CardTitle>
         </CardHeader>
@@ -70,21 +70,21 @@ export default function ComparisonTab() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>تاریخ</TableHead>
-                        <TableHead>ارزش دارایی</TableHead>
-                        <TableHead>خالص تغییر ارزش</TableHead>
-                        <TableHead>درصد تغییر</TableHead>
-                        <TableHead>پول ورودی/خروجی</TableHead>
+                        <TableHead className="text-right">تاریخ</TableHead>
+                        <TableHead className="text-right">ارزش دارایی</TableHead>
+                        <TableHead className="text-right">خالص تغییر ارزش</TableHead>
+                        <TableHead className="text-right">درصد تغییر</TableHead>
+                        <TableHead className="text-right">پول ورودی/خروجی</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {detailsData.map((row, index) => (
                         <TableRow key={index}>
-                            <TableCell>{row.date}</TableCell>
-                            <TableCell>{row.assetValue}</TableCell>
-                            <TableCell>{row.netChange}</TableCell>
-                            <TableCell>{row.netChangePercent}</TableCell>
-                            <TableCell>{row.cashIn} / {row.cashOut}</TableCell>
+                            <TableCell className="text-right">{row.date}</TableCell>
+                            <TableCell className="text-right">{row.assetValue}</TableCell>
+                            <TableCell className="text-right">{row.netChange}</TableCell>
+                            <TableCell className="text-right">{row.netChangePercent}</TableCell>
+                            <TableCell className="text-right">{row.cashIn} / {row.cashOut}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

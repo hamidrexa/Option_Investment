@@ -22,7 +22,7 @@ import {
   Link2,
   UserCircle,
   LogOut,
-  ChevronLeft,
+  ChevronRight,
   PieChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -50,18 +50,18 @@ export function AppSidebar() {
     <>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-between p-2">
-            <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">D</div>
-                <span className="text-lg font-semibold text-sidebar-foreground">شبیه‌ساز مشتقه</span>
-            </div>
             <Button
                 variant="ghost"
                 size="icon"
                 className="hidden md:flex h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 onClick={toggleSidebar}
             >
-                <ChevronLeft className={cn("transition-transform", state === "collapsed" && "rotate-180")} />
+                <ChevronRight className={cn("transition-transform", state === "collapsed" && "rotate-180")} />
             </Button>
+            <div className="flex items-center gap-2">
+                <span className="text-lg font-semibold text-sidebar-foreground">شبیه‌ساز مشتقه</span>
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">D</div>
+            </div>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -77,12 +77,12 @@ export function AppSidebar() {
                     className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
                   }}
                   className={cn(
-                    'group-data-[collapsible=icon]:justify-center'
+                    'group-data-[collapsible=icon]:justify-center flex-row-reverse'
                   )}
                 >
                   <a>
                     <item.icon className="shrink-0" />
-                    <span>{item.label}</span>
+                    <span className="mr-auto">{item.label}</span>
                   </a>
                 </SidebarMenuButton>
               </Link>
@@ -95,20 +95,20 @@ export function AppSidebar() {
           <SidebarMenu>
               <SidebarMenuItem>
                  <SidebarMenuButton
-                    className={cn('group-data-[collapsible=icon]:justify-center')}
+                    className={cn('group-data-[collapsible=icon]:justify-center flex-row-reverse')}
                      tooltip={{
                         children: 'خروج',
                         className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
                      }}
                  >
-                    <Link href="/profile" className="flex items-center gap-2">
+                    <Link href="/profile" className="flex items-center gap-2 flex-row-reverse">
+                        <LogOut className="h-4 w-4" />
+                        <span className="mr-auto">علیرضا کریمی</span>
                          <Avatar className="w-7 h-7">
                             <AvatarImage src="https://picsum.photos/seed/user/128/128" />
                             <AvatarFallback>AK</AvatarFallback>
                         </Avatar>
-                        <span>علیرضا کریمی</span>
                     </Link>
-                    <LogOut className="mr-auto h-4 w-4" />
                 </SidebarMenuButton>
               </SidebarMenuItem>
           </SidebarMenu>

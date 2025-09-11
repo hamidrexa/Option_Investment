@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table"
 import type { Position } from "@/types/domain"
 import { Button } from "@/components/ui/button"
-import { ArrowUpDown, ChevronDown } from "lucide-react"
+import { ArrowUpDown } from "lucide-react"
 
 const formatCurrency = (value: number | undefined | null, showSign = false) => {
     if (value === undefined || value === null) return 'N/A';
@@ -36,7 +36,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
   {
     accessorKey: "symbol",
     header: "نماد",
-    cell: ({ row }) => <div className="font-medium">{row.getValue("symbol")}</div>,
+    cell: ({ row }) => <div className="font-medium text-right">{row.getValue("symbol")}</div>,
     size: 120,
   },
    {
@@ -55,7 +55,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "portfolioAllocation",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        تخصیص ٪<ArrowUpDown className="mr-2 h-4 w-4" />
+        تخصیص ٪<ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{formatPercent(row.original.portfolioAllocation)}</div>,
@@ -65,7 +65,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "quantity",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        تعداد<ArrowUpDown className="mr-2 h-4 w-4" />
+        تعداد<ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{formatNumber(row.getValue("quantity"))}</div>,
@@ -74,53 +74,53 @@ export const getColumns = (): ColumnDef<Position>[] => [
   {
     accessorKey: "avgCost",
     header: "بهای هر سهم",
-    cell: ({ row }) => <div className="text-center">{formatCurrency(row.original.avgCost)}</div>,
+    cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.avgCost)}</div>,
     size: 120,
   },
   {
     accessorKey: "totalCost",
     header: "بهای کل تمام شده",
-    cell: ({ row }) => <div className="text-center">{formatCurrency(row.original.avgCost * row.original.quantity)}</div>,
+    cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.avgCost * row.original.quantity)}</div>,
     size: 150,
   },
   {
     accessorKey: "marketPrice",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        آخرین قیمت<ArrowUpDown className="mr-2 h-4 w-4" />
+        آخرین قیمت<ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="text-left">{formatCurrency(row.getValue("marketPrice"))}</div>,
+    cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("marketPrice"))}</div>,
     size: 120,
   },
     {
     accessorKey: "closePrice",
     header: "قیمت پایانی",
-    cell: ({ row }) => <div className="text-left">{formatCurrency(row.original.closePrice)}</div>,
+    cell: ({ row }) => <div className="text-right">{formatCurrency(row.original.closePrice)}</div>,
     size: 120,
   },
   {
     accessorKey: "marketValue",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        ارزش بازار<ArrowUpDown className="mr-2 h-4 w-4" />
+        ارزش بازار<ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
-    cell: ({ row }) => <div className="text-left">{formatCurrency(row.getValue("marketValue"))}</div>,
+    cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("marketValue"))}</div>,
     size: 150,
   },
     {
     accessorKey: "unrealizedPnl",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        سود/زیان خالص<ArrowUpDown className="mr-2 h-4 w-4" />
+        سود/زیان خالص<ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
       const pnl = parseFloat(row.getValue("unrealizedPnl"))
       const isPositive = pnl >= 0
       return (
-        <div className={`text-left font-medium ${isPositive ? "text-green-600" : "text-red-600"}`}>
+        <div className={`text-right font-medium ${isPositive ? "text-green-600" : "text-red-600"}`}>
           {formatCurrency(pnl, true)}
         </div>
       )
