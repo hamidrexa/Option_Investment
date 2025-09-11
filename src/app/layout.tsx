@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { AppShell } from '@/components/layout/AppShell';
 import { DemoProvider } from '@/context/DemoContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 
 export const metadata: Metadata = {
   title: 'DerivaSim | شبیه‌ساز مشتقه',
@@ -25,10 +26,12 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <DemoProvider>
-          <AppShell>{children}</AppShell>
-          <Toaster />
-        </DemoProvider>
+        <ThemeProvider>
+          <DemoProvider>
+            <AppShell>{children}</AppShell>
+            <Toaster />
+          </DemoProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

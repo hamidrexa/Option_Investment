@@ -6,14 +6,16 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useTheme } from "@/context/ThemeContext";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Sun, Moon } from "lucide-react";
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState("");
   const { toast } = useToast();
+  const { theme, setTheme } = useTheme();
 
   const handleSave = () => {
-    // In a real application, this would securely save the key on the server.
-    // For this demo, we'll just show a confirmation toast.
     console.log("API Key to save:", apiKey);
     toast({
       title: "تنظیمات ذخیره شد",
@@ -45,6 +47,36 @@ export default function SettingsPage() {
         <CardFooter>
             <Button onClick={handleSave}>ذخیره</Button>
         </CardFooter>
+      </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>ظاهر برنامه</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label>تم</Label>
+            <RadioGroup
+              defaultValue={theme}
+              onValueChange={(value) => setTheme(value as 'light' | 'dark')}
+              className="flex items-center space-x-4 space-x-reverse"
+            >
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value="light" id="light" />
+                <Label htmlFor="light" className="flex items-center gap-2 cursor-pointer">
+                  <Sun className="h-5 w-5" />
+                  روشن
+                </Label>
+              </div>
+              <div className="flex items-center space-x-2 space-x-reverse">
+                <RadioGroupItem value="dark" id="dark" />
+                <Label htmlFor="dark" className="flex items-center gap-2 cursor-pointer">
+                  <Moon className="h-5 w-5" />
+                  تاریک
+                </Label>
+              </div>
+            </RadioGroup>
+          </div>
+        </CardContent>
       </Card>
       <Card>
         <CardHeader>
