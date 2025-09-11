@@ -4,21 +4,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Scale } from 'lucide-react';
 import type { PortfolioSnapshot } from '@/types/domain';
 
-interface KeyMetricsDisplayProps {
-  portfolio: PortfolioSnapshot;
-}
-
 const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('fa-IR', {
     style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    currency: 'IRR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(value);
 };
 
 const formatPercentage = (value: number) => {
-  return `${value.toFixed(2)}%`;
+  return `%${new Intl.NumberFormat('fa-IR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(value)}`;
 };
 
 export default function KeyMetricsDisplay({ portfolio }: KeyMetricsDisplayProps) {
@@ -29,17 +28,17 @@ export default function KeyMetricsDisplay({ portfolio }: KeyMetricsDisplayProps)
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Value</CardTitle>
+          <CardTitle className="text-sm font-medium">ارزش کل پرتفوی</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(totalValue)}</div>
-          <p className="text-xs text-muted-foreground">Updated just now</p>
+          <p className="text-xs text-muted-foreground">لحظاتی پیش به‌روز شد</p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total P&L</CardTitle>
+          <CardTitle className="text-sm font-medium">سود و زیان کل</CardTitle>
           {isPnlPositive ? (
             <TrendingUp className="h-4 w-4 text-green-500" />
           ) : (
@@ -57,25 +56,25 @@ export default function KeyMetricsDisplay({ portfolio }: KeyMetricsDisplayProps)
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Margin Used</CardTitle>
+          <CardTitle className="text-sm font-medium">مارجین استفاده شده</CardTitle>
           <Scale className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(marginUsed)}</div>
           <p className="text-xs text-muted-foreground">
-            {formatPercentage((marginUsed / totalValue) * 100)} of total value
+            {formatPercentage((marginUsed / totalValue) * 100)} از ارزش کل
           </p>
         </CardContent>
       </Card>
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Cash</CardTitle>
+          <CardTitle className="text-sm font-medium">وجه نقد</CardTitle>
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(portfolio.cash)}</div>
            <p className="text-xs text-muted-foreground">
-            {formatPercentage((portfolio.cash / totalValue) * 100)} of total value
+            {formatPercentage((portfolio.cash / totalValue) * 100)} از ارزش کل
           </p>
         </CardContent>
       </Card>

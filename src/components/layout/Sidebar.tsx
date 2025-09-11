@@ -22,7 +22,7 @@ import { cn } from '@/lib/utils';
 
 const menuItems = [
   { href: '/', label: 'داشبورد', icon: LayoutDashboard },
-  { href: '/option-chain/TSLA', label: 'زنجیره اختیار معامله', icon: Link2 },
+  { href: '/option-chain/خودرو', label: 'زنجیره اختیار معامله', icon: Link2 },
   { href: '/strategy-builder', label: 'استراتژی ساز', icon: CandlestickChart },
   { href: '/pnl/pf-001', label: 'گزارش سود و زیان', icon: AreaChart },
   { href: '/market-watch', label: 'دیده بان بازار', icon: FileText },
@@ -39,7 +39,7 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 p-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">D</div>
-            <span className="text-lg font-semibold text-sidebar-foreground">DerivaSim</span>
+            <span className="text-lg font-semibold text-sidebar-foreground">شبیه‌ساز مشتقه</span>
         </div>
       </SidebarHeader>
       <SidebarContent>

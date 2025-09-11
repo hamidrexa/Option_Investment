@@ -12,15 +12,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider {...sidebarConfig}>
-      <Sidebar>
-        <AppSidebar />
-      </Sidebar>
       <SidebarInset className="min-h-screen flex flex-col">
         <AppHeader />
         <main className="flex-1 p-4 sm:p-6 lg:p-8 bg-background/95">
             {children}
         </main>
       </SidebarInset>
+      <Sidebar side="right">
+        <AppSidebar />
+      </Sidebar>
     </SidebarProvider>
   );
 }

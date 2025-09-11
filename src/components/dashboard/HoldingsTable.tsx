@@ -60,11 +60,11 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Holdings</h3>
+        <h3 className="text-xl font-semibold">دارایی‌ها</h3>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
-              Columns <ChevronDown className="ml-2 h-4 w-4" />
+              ستون‌ها <ChevronDown className="mr-2 h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
@@ -81,7 +81,14 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id}
+                    {column.id === 'symbol' ? 'نماد' :
+                     column.id === 'quantity' ? 'تعداد' :
+                     column.id === 'marketPrice' ? 'آخرین قیمت' :
+                     column.id === 'marketValue' ? 'ارزش بازار' :
+                     column.id === 'unrealizedPnl' ? 'سود/زیان خالص' :
+                     column.id === 'greeks.delta' ? 'دلتا' :
+                     column.id === 'portfolioAllocation' ? 'تخصیص ٪' :
+                     column.id}
                   </DropdownMenuCheckboxItem>
                 )
               })}
@@ -131,7 +138,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  هیچ نتیجه‌ای یافت نشد.
                 </TableCell>
               </TableRow>
             )}
@@ -146,7 +153,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
           >
-            Previous
+            قبلی
           </Button>
           <Button
             variant="outline"
@@ -154,7 +161,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
           >
-            Next
+            بعدی
           </Button>
         </div>
       </div>
