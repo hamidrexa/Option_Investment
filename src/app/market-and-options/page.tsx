@@ -1,10 +1,10 @@
 
 'use client';
 
-import { BarChart, LineChart, AreaChart, TrendingUp, TrendingDown, Package, Activity } from "lucide-react";
+import { BarChart, LineChart, Activity, TrendingUp, TrendingDown, Package } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ResponsiveContainer, Line, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, Line, XAxis, YAxis, Tooltip, Legend, LineChart as RechartsLineChart } from 'recharts';
 
 const mockData = [
   { name: '10:00', value: 2150000 },
@@ -91,7 +91,7 @@ export default function MarketAndOptionsPage() {
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <LineChart data={mockData}>
+                    <RechartsLineChart data={mockData}>
                       <XAxis dataKey="name" stroke="hsl(var(--foreground))" fontSize={12} />
                       <YAxis stroke="hsl(var(--foreground))" fontSize={12} tickFormatter={(value) => formatNumber(value)} domain={['dataMin - 1000', 'dataMax + 1000']} />
                       <Tooltip
@@ -104,7 +104,7 @@ export default function MarketAndOptionsPage() {
                       />
                       <Legend wrapperStyle={{direction: 'rtl'}} />
                       <Line type="monotone" dataKey="value" stroke="hsl(var(--primary))" name="شاخص کل" strokeWidth={2} dot={false} />
-                    </LineChart>
+                    </RechartsLineChart>
                   </ResponsiveContainer>
                 </CardContent>
               </Card>

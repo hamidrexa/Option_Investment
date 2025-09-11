@@ -68,7 +68,7 @@ export function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref legacyBehavior={item.href.includes('option-chain')}>
+              <Link href={item.href} passHref>
                 <SidebarMenuButton
                   as="a"
                   isActive={pathname === item.href}
@@ -90,6 +90,7 @@ export function AppSidebar() {
           <SidebarMenu>
               <SidebarMenuItem>
                  <SidebarMenuButton
+                    asChild
                      tooltip={{
                         children: 'پروفایل',
                         className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
