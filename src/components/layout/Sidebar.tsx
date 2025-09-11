@@ -25,6 +25,7 @@ import {
   ChevronRight,
   PieChart,
   View,
+  BarChart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -34,6 +35,7 @@ const menuItems = [
   { href: '/', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/portfolio-glance', label: 'سبد در یک نگاه', icon: PieChart },
   { href: '/market-and-options', label: 'دیده‌بان و زنجیره آپشن', icon: View },
+  { href: '/statistical-analysis', label: 'تحلیلهای آماری و سنتیمنت بازار', icon: BarChart },
   { href: '/strategy-builder', label: 'استراتژی ساز', icon: CandlestickChart },
   { href: '/pnl/pf-001', label: 'گزارش سود و زیان', icon: AreaChart },
   { href: '/orders', label: 'سفارشات', icon: FileText },
