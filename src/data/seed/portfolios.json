@@ -17,11 +17,13 @@
         "quantity": 10000,
         "avgCost": 90550,
         "marketPrice": 95025,
+        "closePrice": 94500,
         "marketValue": 950250000,
         "unrealizedPnl": 44750000,
         "realizedPnl": 120000000,
         "greeks": { "delta": 10000, "gamma": 0, "theta": 0, "vega": 0 },
-        "portfolioAllocation": 7.55
+        "portfolioAllocation": 7.55,
+        "broker": "مفید"
       },
       {
         "id": "pos-002",
@@ -34,12 +36,14 @@
         "quantity": 50,
         "avgCost": 1550,
         "marketPrice": 1875,
+        "closePrice": 1850,
         "marketValue": 93750000,
         "unrealizedPnl": 16250000,
         "realizedPnl": 0,
         "greeks": { "delta": 25, "gamma": 0.8, "theta": -550, "vega": 1200 },
         "strategyId": "st-001",
-        "portfolioAllocation": 0.74
+        "portfolioAllocation": 0.74,
+        "broker": "آگاه"
       },
       {
         "id": "pos-004",
@@ -52,12 +56,14 @@
         "quantity": -50,
         "avgCost": 1200,
         "marketPrice": 1450,
+        "closePrice": 1480,
         "marketValue": -72500000,
         "unrealizedPnl": -12500000,
         "realizedPnl": 0,
         "greeks": { "delta": -20, "gamma": -0.7, "theta": 450, "vega": -1100 },
         "strategyId": "st-001",
-        "portfolioAllocation": -0.57
+        "portfolioAllocation": -0.57,
+        "broker": "آگاه"
       },
       {
         "id": "pos-003",
@@ -70,12 +76,14 @@
         "quantity": -200,
         "avgCost": 520,
         "marketPrice": 410,
+        "closePrice": 400,
         "marketValue": -8200000,
         "unrealizedPnl": 2200000,
         "realizedPnl": 500000,
         "greeks": { "delta": 8.4, "gamma": -0.2, "theta": 150, "vega": -300 },
         "strategyId": "st-002",
-        "portfolioAllocation": -0.06
+        "portfolioAllocation": -0.06,
+        "broker": "فارابی"
       }
     ],
     "strategies": [

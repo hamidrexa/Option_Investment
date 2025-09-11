@@ -44,6 +44,7 @@ export interface Position {
   avgCost: number;
   marketPrice: number;
   marketValue: number;
+  closePrice?: number;
   unrealizedPnl: number;
   realizedPnl: number;
   greeks?: {

@@ -8,6 +8,7 @@ import { Terminal, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AllocationTreemap from '@/components/portfolio-glance/AllocationTreemap';
 import StrategyPieChart from '@/components/portfolio-glance/StrategyPieChart';
+import HoldingsTable from '@/components/dashboard/HoldingsTable';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fa-IR', {
@@ -33,6 +34,7 @@ export default function PortfolioGlancePage() {
           <Skeleton className="h-96" />
           <Skeleton className="h-96" />
         </div>
+        <Skeleton className="h-96" />
       </div>
     );
   }
@@ -94,6 +96,17 @@ export default function PortfolioGlancePage() {
           <CardContent>
              <StrategyPieChart data={portfolio.strategies} portfolioValue={portfolio.totalValue} />
           </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-6">
+        <Card>
+            <CardHeader>
+                <CardTitle>جزئیات دارایی‌ها</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <HoldingsTable data={portfolio.positions} />
+            </CardContent>
         </Card>
       </div>
     </div>

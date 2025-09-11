@@ -10,7 +10,10 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  getFilteredRowModel,
+  ColumnFiltersState,
 } from "@tanstack/react-table"
+import { Input } from "@/components/ui/input"
 
 import {
   Table,
@@ -37,8 +40,15 @@ interface HoldingsTableProps {
 
 export default function HoldingsTable({ data }: HoldingsTableProps) {
   const [sorting, setSorting] = React.useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({
-      'instrumentType': false,
+      'broker': false,
+      'expiry': false,
+      'avgCost': false,
+      'totalCost': false,
+      'closePrice': false,
+      'unrealizedPnlPercent': false,
+      'greeks.delta': true,
   })
 
   const columns = React.useMemo(() => getColumns(), [])
@@ -47,20 +57,46 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
     data,
     columns,
     onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
+      columnFilters,
       columnVisibility,
     },
   })
+  
+  const columnTranslations: { [key: string]: string } = {
+    symbol: "نماد",
+    broker: "کارگزار",
+    expiry: "سررسید",
+    portfolioAllocation: "تخصیص ٪",
+    quantity: "تعداد",
+    avgCost: "بهای هر سهم",
+    totalCost: "بهای کل",
+    marketPrice: "آخرین قیمت",
+    closePrice: "قیمت پایانی",
+    marketValue: "ارزش بازار",
+    unrealizedPnl: "سود/زیان خالص",
+    unrealizedPnlPercent: "درصد سود/زیان",
+    "greeks.delta": "دلتا",
+  };
 
   return (
     <div className="w-full space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">دارایی‌ها</h3>
+         <Input
+          placeholder="جستجو در نماد..."
+          value={(table.getColumn("symbol")?.getFilterValue() as string) ?? ""}
+          onChange={(event) =>
+            table.getColumn("symbol")?.setFilterValue(event.target.value)
+          }
+          className="max-w-sm"
+        />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="ml-auto">
@@ -81,14 +117,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
                       column.toggleVisibility(!!value)
                     }
                   >
-                    {column.id === 'symbol' ? 'نماد' :
-                     column.id === 'quantity' ? 'تعداد' :
-                     column.id === 'marketPrice' ? 'آخرین قیمت' :
-                     column.id === 'marketValue' ? 'ارزش بازار' :
-                     column.id === 'unrealizedPnl' ? 'سود/زیان خالص' :
-                     column.id === 'greeks.delta' ? 'دلتا' :
-                     column.id === 'portfolioAllocation' ? 'تخصیص ٪' :
-                     column.id}
+                    {columnTranslations[column.id] || column.id}
                   </DropdownMenuCheckboxItem>
                 )
               })}
@@ -102,7 +131,7 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} style={{ width: `${header.getSize()}px` }}>
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -145,8 +174,12 @@ export default function HoldingsTable({ data }: HoldingsTableProps) {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <div className="space-x-2">
+      <div className="flex items-center justify-end space-x-2 py-4 space-x-reverse">
+         <div className="flex-1 text-sm text-muted-foreground">
+          {table.getFilteredSelectedRowModel().rows.length} از {" "}
+          {table.getFilteredRowModel().rows.length} سطر(ها) انتخاب شده.
+        </div>
+        <div className="space-x-2 space-x-reverse">
           <Button
             variant="outline"
             size="sm"
