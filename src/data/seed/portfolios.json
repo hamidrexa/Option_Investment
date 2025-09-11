@@ -3,6 +3,7 @@
     "id": "pf-001",
     "name": "پرتفوی رشد تهاجمی",
     "totalValue": 12583400000,
+    "totalValueAtClose": 12550000000,
     "cash": 1500000000,
     "marginUsed": 450000000,
     "totalPnL": 884500250,
@@ -37,7 +38,26 @@
         "unrealizedPnl": 16250000,
         "realizedPnl": 0,
         "greeks": { "delta": 25, "gamma": 0.8, "theta": -550, "vega": 1200 },
-        "portfolioAllocation": 7.45
+        "strategyId": "st-001",
+        "portfolioAllocation": 0.74
+      },
+      {
+        "id": "pos-004",
+        "symbol": "ضخود 1101",
+        "instrumentType": "option",
+        "underlying": "خودرو",
+        "strike": 22000,
+        "expiry": "2024-11-20",
+        "optionType": "call",
+        "quantity": -50,
+        "avgCost": 1200,
+        "marketPrice": 1450,
+        "marketValue": -72500000,
+        "unrealizedPnl": -12500000,
+        "realizedPnl": 0,
+        "greeks": { "delta": -20, "gamma": -0.7, "theta": 450, "vega": -1100 },
+        "strategyId": "st-001",
+        "portfolioAllocation": -0.57
       },
       {
         "id": "pos-003",
@@ -54,9 +74,28 @@
         "unrealizedPnl": 2200000,
         "realizedPnl": 500000,
         "greeks": { "delta": 8.4, "gamma": -0.2, "theta": 150, "vega": -300 },
-        "portfolioAllocation": -0.65
+        "strategyId": "st-002",
+        "portfolioAllocation": -0.06
       }
     ],
-    "strategies": []
+    "strategies": [
+        {
+          "id": "st-001",
+          "name": "اسپرد خرید",
+          "marketValue": 21250000,
+          "legs": [
+            { "positionId": "pos-002" },
+            { "positionId": "pos-004" }
+          ]
+        },
+        {
+          "id": "st-002",
+          "name": "فروش اختیار فروش",
+           "marketValue": -8200000,
+          "legs": [
+            { "positionId": "pos-003" }
+          ]
+        }
+    ]
   }
 ]

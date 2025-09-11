@@ -75,12 +75,14 @@ export interface Strategy {
   greeks: { delta: number; gamma: number; theta: number; vega: number };
   notional: number;
   currentPnL: number;
+  marketValue: number;
 }
 
 export interface PortfolioSnapshot {
   id: UUID;
   name: string;
   totalValue: number;
+  totalValueAtClose: number;
   cash: number;
   marginUsed: number;
   totalPnL: number;

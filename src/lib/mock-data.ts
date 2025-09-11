@@ -1,5 +1,6 @@
-import type { PortfolioSnapshot, OptionContract, HistoricalPrice, Position, Underlying } from '@/types/domain';
-import portfolios from '@/data/seed/portfolios.json';
+
+import type { PortfolioSnapshot, OptionContract, HistoricalPrice, Position, Underlying, Strategy } from '@/types/domain';
+import portfoliosData from '@/data/seed/portfolios.json';
 import optionChains from '@/data/seed/option-chains.json';
 import historicalPrices from '@/data/seed/historical-prices.json';
 
@@ -16,8 +17,28 @@ function isHistoricalPriceData(data: any): data is { [key: string]: HistoricalPr
     return typeof data === 'object' && data !== null;
 }
 
+// In-memory cache to avoid re-parsing JSON files
+let portfolios: PortfolioSnapshot[] | null = null;
+
 export function seedPortfolios(): PortfolioSnapshot[] {
-  if (isPortfolioSnapshotArray(portfolios)) {
+  if (portfolios) return portfolios;
+
+  if (isPortfolioSnapshotArray(portfoliosData)) {
+    // Post-process strategies to link positions
+    portfolios = portfoliosData.map(portfolio => {
+        const processedStrategies = portfolio.strategies.map(strategy => {
+            let marketValue = 0;
+            const legs = (strategy.legs as any[]).map(leg => {
+                const position = portfolio.positions.find(p => p.id === leg.positionId);
+                if (position) {
+                    marketValue += position.marketValue;
+                }
+                return position ? { ...leg, position } : leg;
+            });
+            return { ...strategy, legs, marketValue };
+        });
+        return { ...portfolio, strategies: processedStrategies as Strategy[] };
+    });
     return portfolios;
   }
   return [];
@@ -36,7 +57,8 @@ export function seedOptionChains(): { [key: string]: { underlying: Underlying, c
 
 export function getOptionChainForSymbol(symbol: string): { underlying: Underlying, contracts: OptionContract[] } | undefined {
     const chains = seedOptionChains();
-    return chains[symbol.toUpperCase()];
+    // Assuming symbols in JSON are uppercase
+    return chains[symbol.toUpperCase()] || chains[symbol]; 
 }
 
 
@@ -49,7 +71,8 @@ export function seedHistoricalPrices(): { [key: string]: HistoricalPrice[] } {
 
 export function getHistoricalPricesForSymbol(symbol: string): HistoricalPrice[] {
     const prices = seedHistoricalPrices();
-    return prices[symbol.toUpperCase()] || [];
+    // Assuming symbols in JSON are uppercase
+    return prices[symbol.toUpperCase()] || prices[symbol] || [];
 }
 
 export function getPositionsForPortfolio(portfolioId: string): Position[] {
