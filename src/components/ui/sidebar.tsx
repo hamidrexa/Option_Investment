@@ -229,10 +229,10 @@ const Sidebar = React.forwardRef<
             "duration-200 fixed inset-y-0 z-10 hidden h-svh transition-[left,right,width] ease-linear md:flex",
             "w-0 group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
             "group-data-[state=expanded]:w-[--sidebar-width]",
-            "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)]",
+            "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] group-data-[side=left]:left-0 group-data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]",
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=right]:border-l",
+              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=right]:border-l group-data-[side=left]:border-r",
             className
           )}
           {...props}
@@ -313,8 +313,10 @@ const SidebarInset = React.forwardRef<
       ref={ref}
       className={cn(
         "relative flex min-h-svh flex-1 flex-col bg-background transition-[margin-right] duration-200 ease-linear",
-        "peer-data-[state=expanded]:md:mr-[--sidebar-width]",
-        "peer-data-[state=collapsed]:md:mr-[--sidebar-width-icon]",
+        "peer-data-[side=right]:peer-data-[state=expanded]:md:mr-[--sidebar-width]",
+        "peer-data-[side=right]:peer-data-[state=collapsed]:md:mr-[--sidebar-width-icon]",
+        "peer-data-[side=left]:peer-data-[state=expanded]:md:ml-[--sidebar-width]",
+        "peer-data-[side=left]:peer-data-[state=collapsed]:md:ml-[--sidebar-width-icon]",
         "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:mr-2 md:peer-data-[variant=inset]:mr-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
         className
       )}
@@ -528,6 +530,7 @@ const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   React.ComponentProps<"button"> & {
     asChild?: boolean
+    as?: React.ElementType
     isActive?: boolean
     tooltip?: string | React.ComponentProps<typeof TooltipContent>
   } & VariantProps<typeof sidebarMenuButtonVariants>
@@ -535,6 +538,7 @@ const SidebarMenuButton = React.forwardRef<
   (
     {
       asChild = false,
+      as: Comp = "button",
       isActive = false,
       variant = "default",
       size = "default",
@@ -545,11 +549,12 @@ const SidebarMenuButton = React.forwardRef<
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button"
     const { isMobile, state } = useSidebar()
+    
+    const ButtonOrLink = asChild ? Slot : Comp
 
     const button = (
-      <Comp
+      <ButtonOrLink
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
@@ -558,7 +563,7 @@ const SidebarMenuButton = React.forwardRef<
         {...props}
       >
         {children}
-      </Comp>
+      </ButtonOrLink>
     )
 
     if (!tooltip) {

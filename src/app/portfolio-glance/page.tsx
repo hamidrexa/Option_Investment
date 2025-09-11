@@ -56,7 +56,7 @@ export default function PortfolioGlancePage() {
       </div>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="flex justify-start">
+        <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-flex">
           <TabsTrigger value="overview">در یک نگاه</TabsTrigger>
           <TabsTrigger value="holdings">جزئیات دارایی</TabsTrigger>
           <TabsTrigger value="comparison">مقایسه</TabsTrigger>

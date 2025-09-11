@@ -50,6 +50,10 @@ export function AppSidebar() {
     <>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center justify-between p-2">
+            <div className="flex items-center gap-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">D</div>
+                <span className="text-lg font-semibold text-sidebar-foreground">شبیه‌ساز مشتقه</span>
+            </div>
             <Button
                 variant="ghost"
                 size="icon"
@@ -58,32 +62,23 @@ export function AppSidebar() {
             >
                 <ChevronRight className={cn("transition-transform", state === "collapsed" && "rotate-180")} />
             </Button>
-            <div className="flex items-center gap-2">
-                <span className="text-lg font-semibold text-sidebar-foreground">شبیه‌ساز مشتقه</span>
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-lg font-bold">D</div>
-            </div>
         </div>
       </SidebarHeader>
       <SidebarContent className="p-2">
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href} passHref legacyBehavior>
                 <SidebarMenuButton
-                  asChild
+                  as="a"
                   isActive={pathname === item.href}
                   tooltip={{
                     children: item.label,
                     className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
                   }}
-                  className={cn(
-                    'group-data-[collapsible=icon]:justify-center flex-row-reverse'
-                  )}
                 >
-                  <a>
-                    <item.icon className="shrink-0" />
-                    <span className="mr-auto">{item.label}</span>
-                  </a>
+                  <item.icon className="shrink-0" />
+                  <span>{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -95,19 +90,18 @@ export function AppSidebar() {
           <SidebarMenu>
               <SidebarMenuItem>
                  <SidebarMenuButton
-                    className={cn('group-data-[collapsible=icon]:justify-center flex-row-reverse')}
                      tooltip={{
-                        children: 'خروج',
+                        children: 'پروفایل',
                         className: 'bg-sidebar-accent text-sidebar-accent-foreground border-sidebar-border'
                      }}
                  >
-                    <Link href="/profile" className="flex items-center gap-2 flex-row-reverse">
-                        <LogOut className="h-4 w-4" />
-                        <span className="mr-auto">علیرضا کریمی</span>
+                    <Link href="/profile" className="flex items-center gap-2 w-full">
                          <Avatar className="w-7 h-7">
                             <AvatarImage src="https://picsum.photos/seed/user/128/128" />
                             <AvatarFallback>AK</AvatarFallback>
                         </Avatar>
+                        <span>علیرضا کریمی</span>
+                        <LogOut className="h-4 w-4 ml-auto" />
                     </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
