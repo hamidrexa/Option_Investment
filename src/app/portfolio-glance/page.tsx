@@ -11,6 +11,7 @@ import AllocationTreemap from '@/components/portfolio-glance/AllocationTreemap';
 import StrategyPieChart from '@/components/portfolio-glance/StrategyPieChart';
 import HoldingsTable from '@/components/dashboard/HoldingsTable';
 import ComparisonTab from '@/components/portfolio-glance/ComparisonTab';
+import RiskAnalysisTab from '@/components/portfolio-glance/RiskAnalysisTab';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fa-IR', {
@@ -55,11 +56,12 @@ export default function PortfolioGlancePage() {
         <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
       </div>
       
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
+      <Tabs defaultValue="overview" className="space-y-4" dir="rtl">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">در یک نگاه</TabsTrigger>
           <TabsTrigger value="holdings">جزئیات دارایی</TabsTrigger>
           <TabsTrigger value="comparison">مقایسه</TabsTrigger>
+          <TabsTrigger value="risk">شناسایی ریسک</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
@@ -118,6 +120,10 @@ export default function PortfolioGlancePage() {
 
         <TabsContent value="comparison" className="space-y-4">
            <ComparisonTab />
+        </TabsContent>
+
+        <TabsContent value="risk" className="space-y-4">
+           <RiskAnalysisTab portfolio={portfolio} />
         </TabsContent>
 
       </Tabs>
