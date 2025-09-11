@@ -26,7 +26,7 @@ export default function PortfolioGlancePage() {
 
   if (isLoading) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-right">
         <Skeleton className="h-8 w-1/4" />
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-96" />
@@ -36,8 +36,8 @@ export default function PortfolioGlancePage() {
 
   if (error || !portfolio) {
     return (
-      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-          <h2 className="text-3xl font-bold tracking-tight text-right">سبد در یک نگاه</h2>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-right">
+          <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
           <Alert variant="destructive" className="text-right">
             <Terminal className="h-4 w-4" />
             <AlertTitle>خطا</AlertTitle>
@@ -50,20 +50,20 @@ export default function PortfolioGlancePage() {
   }
 
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6 text-right">
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
       </div>
       
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3 sm:w-auto sm:inline-flex">
+        <TabsList>
           <TabsTrigger value="overview">در یک نگاه</TabsTrigger>
           <TabsTrigger value="holdings">جزئیات دارایی</TabsTrigger>
           <TabsTrigger value="comparison">مقایسه</TabsTrigger>
         </TabsList>
         
         <TabsContent value="overview" className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 text-right">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">ارزش کل (آخرین قیمت)</CardTitle>
@@ -86,7 +86,7 @@ export default function PortfolioGlancePage() {
                 </Card>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="text-right">
+                <Card>
                 <CardHeader>
                     <CardTitle>نقشه سبد بر اساس تخصیص دارایی</CardTitle>
                 </CardHeader>
@@ -94,7 +94,7 @@ export default function PortfolioGlancePage() {
                     <AllocationTreemap data={portfolio.positions} />
                 </CardContent>
                 </Card>
-                <Card className="text-right">
+                <Card>
                 <CardHeader>
                     <CardTitle>نقشه سبد بر اساس استراتژی</CardTitle>
                 </CardHeader>
@@ -106,7 +106,7 @@ export default function PortfolioGlancePage() {
         </TabsContent>
         
         <TabsContent value="holdings" className="space-y-4">
-            <Card className="text-right">
+            <Card>
                 <CardHeader>
                     <CardTitle>جزئیات دارایی‌ها</CardTitle>
                 </CardHeader>
