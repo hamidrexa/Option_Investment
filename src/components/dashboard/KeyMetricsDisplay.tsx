@@ -4,6 +4,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUp, TrendingDown, DollarSign, Scale } from 'lucide-react';
 import type { PortfolioSnapshot } from '@/types/domain';
 
+interface KeyMetricsDisplayProps {
+  portfolio: PortfolioSnapshot;
+}
+
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fa-IR', {
     style: 'currency',
@@ -40,16 +44,16 @@ export default function KeyMetricsDisplay({ portfolio }: KeyMetricsDisplayProps)
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">سود و زیان کل</CardTitle>
           {isPnlPositive ? (
-            <TrendingUp className="h-4 w-4 text-green-500" />
+            <TrendingUp className="h-4 w-4 text-emerald-500" />
           ) : (
             <TrendingDown className="h-4 w-4 text-red-500" />
           )}
         </CardHeader>
         <CardContent>
-          <div className={`text-2xl font-bold ${isPnlPositive ? 'text-green-500' : 'text-red-500'}`}>
+          <div className={`text-2xl font-bold ${isPnlPositive ? 'text-emerald-500' : 'text-red-500'}`}>
             {formatCurrency(totalPnL)}
           </div>
-          <p className={`text-xs ${isPnlPositive ? 'text-green-500/80' : 'text-red-500/80'}`}>
+          <p className={`text-xs ${isPnlPositive ? 'text-emerald-500/80' : 'text-red-500/80'}`}>
             {formatPercentage(totalPnLPercent)}
           </p>
         </CardContent>

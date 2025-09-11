@@ -55,7 +55,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "portfolioAllocation",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        تخصیص ٪<ArrowUpDown className="ml-2 h-4 w-4" />
+        تخصیص ٪<ArrowUpDown className="mr-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{formatPercent(row.original.portfolioAllocation)}</div>,
@@ -65,7 +65,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "quantity",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        تعداد<ArrowUpDown className="ml-2 h-4 w-4" />
+        تعداد<ArrowUpDown className="mr-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-center">{formatNumber(row.getValue("quantity"))}</div>,
@@ -87,7 +87,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "marketPrice",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        آخرین قیمت<ArrowUpDown className="ml-2 h-4 w-4" />
+        آخرین قیمت<ArrowUpDown className="mr-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("marketPrice"))}</div>,
@@ -103,7 +103,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "marketValue",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        ارزش بازار<ArrowUpDown className="ml-2 h-4 w-4" />
+        ارزش بازار<ArrowUpDown className="mr-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => <div className="text-right">{formatCurrency(row.getValue("marketValue"))}</div>,
@@ -113,14 +113,14 @@ export const getColumns = (): ColumnDef<Position>[] => [
     accessorKey: "unrealizedPnl",
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
-        سود/زیان خالص<ArrowUpDown className="ml-2 h-4 w-4" />
+        سود/زیان خالص<ArrowUpDown className="mr-2 h-4 w-4" />
       </Button>
     ),
     cell: ({ row }) => {
       const pnl = parseFloat(row.getValue("unrealizedPnl"))
       const isPositive = pnl >= 0
       return (
-        <div className={`text-right font-medium ${isPositive ? "text-green-600" : "text-red-600"}`}>
+        <div className={`text-right font-medium ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
           {formatCurrency(pnl, true)}
         </div>
       )
@@ -137,7 +137,7 @@ export const getColumns = (): ColumnDef<Position>[] => [
       const pnlPercent = (pnl / Math.abs(cost)) * 100;
       const isPositive = pnl >= 0;
        return (
-        <div className={`text-center font-medium ${isPositive ? "text-green-600" : "text-red-600"}`}>
+        <div className={`text-center font-medium ${isPositive ? "text-emerald-600" : "text-red-600"}`}>
           {formatPercent(pnlPercent)}
         </div>
       )
