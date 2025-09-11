@@ -21,14 +21,14 @@ import {
 import { cn } from '@/lib/utils';
 
 const menuItems = [
-  { href: '/', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/option-chain/TSLA', label: 'Option Chain', icon: Link2 },
-  { href: '/strategy-builder', label: 'Strategy Builder', icon: CandlestickChart },
-  { href: '/pnl/pf-001', label: 'P&L Reports', icon: AreaChart },
-  { href: '/market-watch', label: 'Market Watch', icon: FileText },
-  { href: '/orders', label: 'Orders', icon: FileText },
-  { href: '/bots', label: 'Bots', icon: Bot },
-  { href: '/settings', label: 'Settings', icon: Settings },
+  { href: '/', label: 'داشبورد', icon: LayoutDashboard },
+  { href: '/option-chain/TSLA', label: 'زنجیره اختیار معامله', icon: Link2 },
+  { href: '/strategy-builder', label: 'استراتژی ساز', icon: CandlestickChart },
+  { href: '/pnl/pf-001', label: 'گزارش سود و زیان', icon: AreaChart },
+  { href: '/market-watch', label: 'دیده بان بازار', icon: FileText },
+  { href: '/orders', label: 'سفارشات', icon: FileText },
+  { href: '/bots', label: 'ربات‌ها', icon: Bot },
+  { href: '/settings', label: 'تنظیمات', icon: Settings },
 ];
 
 export function AppSidebar() {

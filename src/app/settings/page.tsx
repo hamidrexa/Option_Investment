@@ -16,42 +16,42 @@ export default function SettingsPage() {
     // For this demo, we'll just show a confirmation toast.
     console.log("API Key to save:", apiKey);
     toast({
-      title: "Settings Saved",
-      description: "Your API key has been configured (simulated).",
+      title: "تنظیمات ذخیره شد",
+      description: "کلید API شما پیکربندی شد (شبیه‌سازی).",
     });
   };
 
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
+        <h2 className="text-3xl font-bold tracking-tight">تنظیمات</h2>
       </div>
        <Card>
         <CardHeader>
-          <CardTitle>API Configuration</CardTitle>
+          <CardTitle>پیکربندی API</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
             <div className="space-y-2">
-                <Label htmlFor="apiKey">Gemini API Key</Label>
+                <Label htmlFor="apiKey">کلید API Gemini</Label>
                 <Input 
                     id="apiKey" 
                     type="password" 
-                    placeholder="Enter your Gemini API Key"
+                    placeholder="کلید API Gemini خود را وارد کنید"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                 />
             </div>
         </CardContent>
         <CardFooter>
-            <Button onClick={handleSave}>Save</Button>
+            <Button onClick={handleSave}>ذخیره</Button>
         </CardFooter>
       </Card>
       <Card>
         <CardHeader>
-          <CardTitle>More Settings</CardTitle>
+          <CardTitle>تنظیمات بیشتر</CardTitle>
         </CardHeader>
         <CardContent>
-          <p>This section will contain demo controls, API toggles, export options, and other application settings.</p>
+          <p>این بخش شامل کنترل‌های دمو، ضامن‌های API، گزینه‌های خروجی و سایر تنظیمات برنامه خواهد بود.</p>
         </CardContent>
       </Card>
     </div>

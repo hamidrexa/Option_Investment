@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ['Vazirmatn', 'sans-serif'],
+        headline: ['Vazirmatn', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
