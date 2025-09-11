@@ -6,9 +6,11 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Terminal, DollarSign } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AllocationTreemap from '@/components/portfolio-glance/AllocationTreemap';
 import StrategyPieChart from '@/components/portfolio-glance/StrategyPieChart';
 import HoldingsTable from '@/components/dashboard/HoldingsTable';
+import ComparisonTab from '@/components/portfolio-glance/ComparisonTab';
 
 const formatCurrency = (value: number) => {
   return new Intl.NumberFormat('fa-IR', {
@@ -26,14 +28,7 @@ export default function PortfolioGlancePage() {
     return (
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         <Skeleton className="h-8 w-1/4" />
-        <div className="grid gap-4 md:grid-cols-2">
-            <Skeleton className="h-28" />
-            <Skeleton className="h-28" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-96" />
-          <Skeleton className="h-96" />
-        </div>
+        <Skeleton className="h-10 w-full" />
         <Skeleton className="h-96" />
       </div>
     );
@@ -41,13 +36,16 @@ export default function PortfolioGlancePage() {
 
   if (error || !portfolio) {
     return (
-      <Alert variant="destructive">
-        <Terminal className="h-4 w-4" />
-        <AlertTitle>خطا</AlertTitle>
-        <AlertDescription>
-          {error || 'امکان بارگذاری داده‌های پورتفولیو وجود ندارد. لطفاً بعداً دوباره امتحان کنید.'}
-        </AlertDescription>
-      </Alert>
+      <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
+          <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
+          <Alert variant="destructive">
+            <Terminal className="h-4 w-4" />
+            <AlertTitle>خطا</AlertTitle>
+            <AlertDescription>
+              {error || 'امکان بارگذاری داده‌های پورتفولیو وجود ندارد. لطفاً بعداً دوباره امتحان کنید.'}
+            </AlertDescription>
+          </Alert>
+      </div>
     );
   }
 
@@ -57,58 +55,72 @@ export default function PortfolioGlancePage() {
         <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ارزش کل (آخرین قیمت)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(portfolio.totalValue)}</div>
-             <p className="text-xs text-muted-foreground">بر اساس آخرین قیمت معاملات</p>
-            </CardContent>
-        </Card>
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ارزش کل (قیمت پایانی)</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(portfolio.totalValueAtClose)}</div>
-             <p className="text-xs text-muted-foreground">بر اساس قیمت پایانی روز گذشته</p>
-            </CardContent>
-        </Card>
-      </div>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">در یک نگاه</TabsTrigger>
+          <TabsTrigger value="holdings">جزئیات دارایی</TabsTrigger>
+          <TabsTrigger value="comparison">مقایسه</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="overview" className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">ارزش کل (آخرین قیمت)</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                    <div className="text-2xl font-bold">{formatCurrency(portfolio.totalValue)}</div>
+                    <p className="text-xs text-muted-foreground">بر اساس آخرین قیمت معاملات</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">ارزش کل (قیمت پایانی)</CardTitle>
+                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                    <div className="text-2xl font-bold">{formatCurrency(portfolio.totalValueAtClose)}</div>
+                    <p className="text-xs text-muted-foreground">بر اساس قیمت پایانی روز گذشته</p>
+                    </CardContent>
+                </Card>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <Card>
+                <CardHeader>
+                    <CardTitle>نقشه سبد بر اساس تخصیص دارایی</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <AllocationTreemap data={portfolio.positions} />
+                </CardContent>
+                </Card>
+                <Card>
+                <CardHeader>
+                    <CardTitle>نقشه سبد بر اساس استراتژی</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <StrategyPieChart data={portfolio.strategies} portfolioValue={portfolio.totalValue} />
+                </CardContent>
+                </Card>
+            </div>
+        </TabsContent>
+        
+        <TabsContent value="holdings" className="space-y-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>جزئیات دارایی‌ها</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <HoldingsTable data={portfolio.positions} />
+                </CardContent>
+            </Card>
+        </TabsContent>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>نقشه سبد بر اساس تخصیص دارایی</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <AllocationTreemap data={portfolio.positions} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>نقشه سبد بر اساس استراتژی</CardTitle>
-          </CardHeader>
-          <CardContent>
-             <StrategyPieChart data={portfolio.strategies} portfolioValue={portfolio.totalValue} />
-          </CardContent>
-        </Card>
-      </div>
+        <TabsContent value="comparison" className="space-y-4">
+           <ComparisonTab />
+        </TabsContent>
 
-      <div className="mt-6">
-        <Card>
-            <CardHeader>
-                <CardTitle>جزئیات دارایی‌ها</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <HoldingsTable data={portfolio.positions} />
-            </CardContent>
-        </Card>
-      </div>
+      </Tabs>
     </div>
   );
 }
