@@ -24,6 +24,7 @@ import {
   LogOut,
   ChevronRight,
   PieChart,
+  View,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -32,10 +33,9 @@ import { Button } from '@/components/ui/button';
 const menuItems = [
   { href: '/', label: 'داشبورد', icon: LayoutDashboard },
   { href: '/portfolio-glance', label: 'سبد در یک نگاه', icon: PieChart },
-  { href: '/option-chain/خودرو', label: 'زنجیره اختیار معامله', icon: Link2 },
+  { href: '/market-and-options', label: 'دیده‌بان و زنجیره آپشن', icon: View },
   { href: '/strategy-builder', label: 'استراتژی ساز', icon: CandlestickChart },
   { href: '/pnl/pf-001', label: 'گزارش سود و زیان', icon: AreaChart },
-  { href: '/market-watch', label: 'دیده بان بازار', icon: FileText },
   { href: '/orders', label: 'سفارشات', icon: FileText },
   { href: '/bots', label: 'ربات‌ها', icon: Bot },
   { href: '/settings', label: 'تنظیمات', icon: Settings },
@@ -68,7 +68,7 @@ export function AppSidebar() {
         <SidebarMenu>
           {menuItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} passHref legacyBehavior>
+              <Link href={item.href} passHref legacyBehavior={item.href.includes('option-chain')}>
                 <SidebarMenuButton
                   as="a"
                   isActive={pathname === item.href}
