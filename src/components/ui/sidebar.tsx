@@ -229,10 +229,10 @@ const Sidebar = React.forwardRef<
             "duration-200 fixed inset-y-0 z-10 hidden h-svh transition-[left,right,width] ease-linear md:flex",
             "w-0 group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
             "group-data-[state=expanded]:w-[--sidebar-width]",
-            "right-0 group-data-[collapsible=offcanvas]:right-[calc(var(--sidebar-width)*-1)] group-data-[side=left]:left-0 group-data-[side=left]:group-data-[collapsible=offcanvas]:left-[calc(var(--sidebar-width)*-1)]",
+            "inset-e-0 group-data-[collapsible=offcanvas]:inset-e-[calc(var(--sidebar-width)*-1)] group-data-[side=left]:inset-s-0 group-data-[side=left]:group-data-[collapsible=offcanvas]:inset-s-[calc(var(--sidebar-width)*-1)]",
             variant === "floating" || variant === "inset"
               ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_+2px)]"
-              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=right]:border-l group-data-[side=left]:border-r",
+              : "group-data-[collapsible=icon]:w-[--sidebar-width-icon] group-data-[side=right]:border-s group-data-[side=left]:border-e",
             className
           )}
           {...props}
@@ -312,12 +312,19 @@ const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-background transition-[margin-right] duration-200 ease-linear",
-        "peer-data-[side=right]:peer-data-[state=expanded]:md:mr-[--sidebar-width]",
-        "peer-data-[side=right]:peer-data-[state=collapsed]:md:mr-[--sidebar-width-icon]",
-        "peer-data-[side=left]:peer-data-[state=expanded]:md:ml-[--sidebar-width]",
-        "peer-data-[side=left]:peer-data-[state=collapsed]:md:ml-[--sidebar-width-icon]",
-        "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))] md:peer-data-[variant=inset]:m-2 md:peer-data-[state=collapsed]:peer-data-[variant=inset]:mr-2 md:peer-data-[variant=inset]:mr-0 md:peer-data-[variant=inset]:rounded-xl md:peer-data-[variant=inset]:shadow",
+        "relative flex min-h-svh flex-1 flex-col bg-background transition-[margin] duration-200 ease-linear",
+        // When sidebar is on the right
+        "peer-data-[side=right]:peer-data-[state=expanded]:md:me-[--sidebar-width]",
+        "peer-data-[side=right]:peer-data-[state=collapsed]:md:me-[--sidebar-width-icon]",
+        // When sidebar is on the left
+        "peer-data-[side=left]:peer-data-[state=expanded]:md:ms-[--sidebar-width]",
+        "peer-data-[side=left]:peer-data-[state=collapsed]:md:ms-[--sidebar-width-icon]",
+        // Inset variant adjustments
+        "peer-data-[variant=inset]:min-h-[calc(100svh-theme(spacing.4))]",
+        "md:peer-data-[variant=inset]:m-2",
+        "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:me-[calc(var(--sidebar-width-icon)_-_var(--margin-offset,0rem))]",
+        "md:peer-data-[variant=inset]:rounded-xl",
+        "md:peer-data-[variant=inset]:shadow",
         className
       )}
       {...props}

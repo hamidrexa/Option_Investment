@@ -7,7 +7,7 @@ import { SentimentTab } from "@/components/statistical-analysis/SentimentTab";
 export default function StatisticalAnalysisPage() {
   return (
     <div className="container mx-auto p-4">
-      <Tabs defaultValue="statistical" dir="rtl">
+      <Tabs defaultValue="statistical">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="statistical">آماری</TabsTrigger>
           <TabsTrigger value="sentiment">سنتیمنت</TabsTrigger>

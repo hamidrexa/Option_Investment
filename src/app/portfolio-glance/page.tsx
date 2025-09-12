@@ -56,7 +56,7 @@ export default function PortfolioGlancePage() {
         <h2 className="text-3xl font-bold tracking-tight">سبد در یک نگاه</h2>
       </div>
       
-      <Tabs defaultValue="overview" className="space-y-4" dir="rtl">
+      <Tabs defaultValue="overview" className="space-y-4">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview">در یک نگاه</TabsTrigger>
           <TabsTrigger value="holdings">جزئیات دارایی</TabsTrigger>

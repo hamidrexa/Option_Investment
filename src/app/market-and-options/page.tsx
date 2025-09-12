@@ -8,7 +8,7 @@ import { AnalyticalMetrics } from "@/components/market-and-options/AnalyticalMet
 export default function MarketAndOptionsPage() {
   return (
     <div className="container mx-auto p-4">
-      <Tabs defaultValue="market-overview" dir="rtl">
+      <Tabs defaultValue="market-overview">
         <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="market-overview">دیده‌بان</TabsTrigger>
           <TabsTrigger value="option-chain">زنجیره اختیار معامله</TabsTrigger>

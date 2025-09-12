@@ -15,7 +15,7 @@ export function AppHeader() {
       <div className="flex w-full items-center justify-between">
         <div className="flex items-center gap-4">
           <SidebarTrigger className="md:hidden">
-            <PanelRightClose />
+            <PanelRightClose className="rotate-180" />
           </SidebarTrigger>
           <div className="flex items-center gap-x-2">
             <Switch id="live-demo-toggle" checked={isLive} onCheckedChange={toggleLive} />
