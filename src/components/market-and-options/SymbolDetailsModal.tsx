@@ -1,4 +1,3 @@
-
 import {
   Dialog,
   DialogContent,
@@ -29,19 +28,37 @@ export function SymbolDetailsModal({
   children,
 }: SymbolDetailsModalProps) {
   const [view, setView] = useState<'list' | 'details'>('list');
-  const [details, setDetails] = useState<ContractDetail[]>([]);
+  const [details, setDetails] = useState<ContractDetail[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // --- THE FIX IS INSIDE THIS FUNCTION ---
   const handleDateSelect = async (contract: Contract) => {
     setIsLoading(true);
     setError(null);
+
+    // --- FIX STARTS HERE ---
+    // 1. Create a JavaScript Date object from the ISO string.
+    const dateObject = new Date(contract.expire_date);
+
+    // 2. Extract the year, month, and day.
+    //    getMonth() is 0-indexed (Jan=0), so we add 1.
+    const year = dateObject.getFullYear();
+    const month = dateObject.getMonth() + 1;
+    const day = dateObject.getDate();
+
+    // 3. Create the new date string in the required "YYYY-M-D" format.
+    const formattedExpireDate = `${year}-${month}-${day}`;
+    // --- FIX ENDS HERE ---
+
     try {
-      const result = await fetchContractDetails(symbolId, contract.expire_date);
+      // 4. Use the newly formatted date in the API call.
+      const result = await fetchContractDetails(symbolId, formattedExpireDate);
       setDetails(result);
       setView('details');
     } catch (e) {
       setError("خطا در دریافت جزئیات قرارداد. لطفاً دوباره تلاش کنید.");
+      setDetails(null);
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +66,7 @@ export function SymbolDetailsModal({
 
   const handleBackToList = () => {
     setView('list');
-    setDetails([]);
+    setDetails(null);
     setError(null);
   };
 
@@ -100,7 +117,7 @@ export function SymbolDetailsModal({
             </Button>
             {isLoading && <p className="text-center">در حال بارگذاری جزئیات...</p>}
             {error && <p className="text-center text-red-500">{error}</p>}
-            {!isLoading && !error && (
+            {!isLoading && !error && details && details.length > 0 && (
               <ScrollArea className="h-80">
                 <Table>
                   <TableHeader>
@@ -121,6 +138,9 @@ export function SymbolDetailsModal({
                   </TableBody>
                 </Table>
               </ScrollArea>
+            )}
+             {!isLoading && !error && (!details || details.length === 0) && (
+              <p className="text-center text-gray-500">جزئیاتی برای نمایش وجود ندارد.</p>
             )}
            </div>
         )}
