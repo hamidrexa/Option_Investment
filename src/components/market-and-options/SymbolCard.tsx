@@ -1,90 +1,50 @@
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import { useEffect, useState } from "react";
-import { ApiResponse, Contract, fetchSymbolContracts } from "@/services/symbolService";
+import { SymbolDetailsModal } from "./SymbolDetailsModal";
+import { Contract } from "@/services/symbolService";
+import { Button } from "../ui/button";
 
-interface Symbol {
-  id: string;
-  symbol: string;
+interface SymbolCardProps {
+  symbol: {
+    id: number;
+    symbol: string;
+  };
+  contracts: Contract[];
+  error: string | null; // Add error prop
 }
 
-const SymbolCard = ({ symbol }: { symbol: Symbol }) => {
-  const [data, setData] = useState<ApiResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handleFetchContractData = async () => {
-    // Prevent refetching if data exists or is loading
-    if (data || loading) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await fetchSymbolContracts(symbol.id);
-      setData(result);
-    } catch (e) {
-      setError("Failed to fetch data. Please try again later.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const nonExpiredContractsCount =
-    data?.contracts.filter((c: Contract) => !c.is_expired).length || 0;
+const SymbolCard = ({ symbol, contracts, error }: SymbolCardProps) => {
+  const nonExpiredCount = contracts.filter((c) => !c.is_expired).length;
 
   return (
-    <Card className="w-full">
-      <Accordion type="single" collapsible>
-        <AccordionItem value={symbol.symbol}>
-          <AccordionTrigger onClick={handleFetchContractData}>
-            <div className="flex items-center justify-between w-full pr-4">
-              <span className="font-semibold text-lg">{symbol.symbol}</span>
-              {loading ? (
-                <Badge variant="secondary">Loading...</Badge>
-              ) : (
-                <Badge>{`${nonExpiredContractsCount} non-expired contracts`}</Badge>
-              )}
-            </div>
-          </AccordionTrigger>
-          <AccordionContent>
-            {error && <p className="text-red-500 p-4">{error}</p>}
-            {data && (
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-md">
-                <h4 className="font-semibold mb-2">Contract Details:</h4>
-                <ul className="space-y-2">
-                  {data.contracts.map((contract: Contract, index: number) => (
-                    <li
-                      key={index}
-                      className={`p-2 rounded-md ${
-                        contract.is_expired
-                          ? "bg-red-100 dark:bg-red-900"
-                          : "bg-green-100 dark:bg-green-900"
-                      }`}
-                    >
-                      <p>
-                        <strong>Expire Date:</strong>{" "}
-                        {new Date(contract.expire_date).toLocaleDateString()}
-                      </p>
-                      <p>
-                        <strong>Is Expired:</strong>{" "}
-                        {contract.is_expired ? "Yes" : "No"}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </div>
+    <SymbolDetailsModal symbolName={symbol.symbol} contracts={contracts}>
+      <Card className="w-full hover:shadow-lg transition-shadow duration-300 cursor-pointer" dir="rtl">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-bold">
+            {symbol.symbol}
+          </CardTitle>
+          {error ? (
+            <Badge variant="destructive">خطا</Badge>
+          ) : (
+            <Badge variant="outline">
+              فعال: {nonExpiredCount}
+            </Badge>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            {error ? (
+              <p className="text-red-500">{error}</p>
+            ) : (
+              <p>
+                برای مشاهده جزئیات قراردادها کلیک کنید.
+              </p>
             )}
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </Card>
+          </div>
+        </CardContent>
+      </Card>
+    </SymbolDetailsModal>
   );
 };
 
