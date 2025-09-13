@@ -8,16 +8,18 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Contract, ContractDetail, fetchContractDetails } from "@/services/symbolService";
+import { Contract, ContractDetail, fetchContractDetails, fetchSymbolContracts } from "@/services/symbolService";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, RefreshCw } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SymbolDetailsModalProps {
   symbolId: string;
   symbolName: string;
   initialContracts: Contract[];
+  initialError: string | null;
   children: React.ReactNode;
 }
 
@@ -25,89 +27,148 @@ export function SymbolDetailsModal({
   symbolId,
   symbolName,
   initialContracts,
+  initialError,
   children,
 }: SymbolDetailsModalProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<'list' | 'details'>('list');
+  
+  const [contracts, setContracts] = useState<Contract[]>(initialContracts);
   const [details, setDetails] = useState<ContractDetail[] | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
-  // --- THE FIX IS INSIDE THIS FUNCTION ---
+  const [isListLoading, setIsListLoading] = useState(false);
+  const [isDetailsLoading, setIsDetailsLoading] = useState(false);
+  
+  const [listError, setListError] = useState<string | null>(initialError);
+  const [detailsError, setDetailsError] = useState<string | null>(null);
+  
+  const [selectedContractDate, setSelectedContractDate] = useState('');
+
+
+  const fetchAndSetContracts = async () => {
+    setIsListLoading(true);
+    setListError(null);
+    try {
+      const freshData = await fetchSymbolContracts(symbolId);
+      setContracts(freshData.contracts);
+    } catch (e) {
+      setListError("خطا در بروزرسانی لیست قراردادها.");
+    } finally {
+      setIsListLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    if (isOpen) {
+        // Reset state when opening the modal
+        setView('list');
+        setDetails(null);
+        setDetailsError(null);
+        setListError(initialError);
+        setContracts(initialContracts);
+        
+        // Optionally, uncomment to always fetch fresh data on open
+        // fetchAndSetContracts();
+    }
+  }, [isOpen, initialContracts, initialError, symbolId]);
+
   const handleDateSelect = async (contract: Contract) => {
-    setIsLoading(true);
-    setError(null);
-
-    // --- FIX STARTS HERE ---
-    // 1. Create a JavaScript Date object from the ISO string.
+    setIsDetailsLoading(true);
+    setDetailsError(null);
+    setSelectedContractDate(new Date(contract.expire_date).toLocaleDateString("fa-IR"));
+    
     const dateObject = new Date(contract.expire_date);
-
-    // 2. Extract the year, month, and day.
-    //    getMonth() is 0-indexed (Jan=0), so we add 1.
     const year = dateObject.getFullYear();
-    const month = dateObject.getMonth() + 1;
+    const month = dateObject.getMonth() + 1; // getMonth() is 0-indexed
     const day = dateObject.getDate();
-
-    // 3. Create the new date string in the required "YYYY-M-D" format.
     const formattedExpireDate = `${year}-${month}-${day}`;
-    // --- FIX ENDS HERE ---
 
     try {
-      // 4. Use the newly formatted date in the API call.
       const result = await fetchContractDetails(symbolId, formattedExpireDate);
       setDetails(result);
       setView('details');
     } catch (e) {
-      setError("خطا در دریافت جزئیات قرارداد. لطفاً دوباره تلاش کنید.");
+      setDetailsError("خطا در دریافت جزئیات قرارداد. لطفاً دوباره تلاش کنید.");
       setDetails(null);
     } finally {
-      setIsLoading(false);
+      setIsDetailsLoading(false);
     }
   };
 
   const handleBackToList = () => {
     setView('list');
     setDetails(null);
-    setError(null);
+    setDetailsError(null);
   };
+  
+  const renderDetailValue = (value: any) => {
+    if (typeof value === 'boolean') {
+        return value ? <Badge variant="default">بله</Badge> : <Badge variant="destructive">خیر</Badge>;
+    }
+    if (typeof value === 'number') {
+        return value.toLocaleString('fa-IR');
+    }
+    return String(value);
+  }
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-3xl" dir="rtl">
-        <DialogHeader>
+        <DialogHeader className="text-right">
           <DialogTitle>
             {view === 'list'
               ? `قراردادهای نماد ${symbolName}`
-              : `جزئیات قرارداد ${symbolName}`}
+              : `جزئیات قرارداد ${symbolName} - ${selectedContractDate}`}
           </DialogTitle>
         </DialogHeader>
 
         {view === 'list' && (
-          <ScrollArea className="h-96 w-full rounded-md border p-4">
-            <div className="grid gap-4 py-4">
-              {initialContracts.length > 0 ? (
-                initialContracts.map((contract, index) => (
-                  <div
-                    key={index}
-                    onClick={() => handleDateSelect(contract)}
-                    className="flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-800 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 cursor-pointer transition-colors"
-                  >
-                    <div className="flex flex-col">
-                      <span className="font-semibold">تاریخ انقضا:</span>
-                      <span>
-                        {new Date(contract.expire_date).toLocaleDateString("fa-IR")}
-                      </span>
-                    </div>
-                    <Badge variant={contract.is_expired ? "destructive" : "default"}>
-                      {contract.is_expired ? "منقضی شده" : "فعال"}
-                    </Badge>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-gray-500">قراردادی برای نمایش وجود ندارد.</p>
-              )}
+          <div className="space-y-4">
+            <div className="flex justify-end">
+                <Button onClick={fetchAndSetContracts} variant="outline" size="sm" disabled={isListLoading}>
+                    <RefreshCw className={`ml-2 h-4 w-4 ${isListLoading ? 'animate-spin' : ''}`} />
+                    بروزرسانی
+                </Button>
             </div>
-          </ScrollArea>
+            {isListLoading ? (
+                <div className="space-y-2 p-4">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                </div>
+            ) : listError ? (
+                 <p className="text-center text-red-500 py-10">{listError}</p>
+            ) : (
+              <ScrollArea className="h-96 w-full rounded-md border">
+                <div className="p-4">
+                  {contracts.length > 0 ? (
+                    contracts.map((contract, index) => (
+                      <div
+                        key={index}
+                        onClick={() => handleDateSelect(contract)}
+                        className="flex items-center justify-between p-3 mb-2 bg-muted/50 rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                      >
+                        <div className="flex flex-col">
+                          <span className="font-semibold">
+                            {new Date(contract.expire_date).toLocaleDateString("fa-IR", { year: 'numeric', month: 'long', day: 'numeric' })}
+                          </span>
+                           <span className="text-sm text-muted-foreground">
+                            {`${contract.mature} روز تا سررسید`}
+                          </span>
+                        </div>
+                        <Badge variant={contract.is_expired ? "destructive" : "default"}>
+                          {contract.is_expired ? "منقضی شده" : "فعال"}
+                        </Badge>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-center text-muted-foreground py-10">قراردادی برای نمایش وجود ندارد.</p>
+                  )}
+                </div>
+              </ScrollArea>
+            )}
+          </div>
         )}
         
         {view === 'details' && (
@@ -115,10 +176,12 @@ export function SymbolDetailsModal({
             <Button onClick={handleBackToList} variant="outline" className="mb-4">
                 <ArrowRightIcon className="ml-2 h-4 w-4" /> بازگشت به لیست
             </Button>
-            {isLoading && <p className="text-center">در حال بارگذاری جزئیات...</p>}
-            {error && <p className="text-center text-red-500">{error}</p>}
-            {!isLoading && !error && details && details.length > 0 && (
-              <ScrollArea className="h-80">
+            {isDetailsLoading ? (
+                <div className="p-4"><Skeleton className="h-80 w-full" /></div>
+            ): detailsError ? (
+                <p className="text-center text-red-500 py-10">{detailsError}</p>
+            ) : details && details.length > 0 ? (
+              <ScrollArea className="h-80 border rounded-md">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -131,22 +194,21 @@ export function SymbolDetailsModal({
                       Object.entries(detail).map(([key, value]) => (
                         <TableRow key={`${index}-${key}`}>
                           <TableCell className="font-medium">{key}</TableCell>
-                          <TableCell>{String(value)}</TableCell>
+                          <TableCell className="text-left" dir="ltr">{renderDetailValue(value)}</TableCell>
                         </TableRow>
                       ))
                     ))}
                   </TableBody>
                 </Table>
               </ScrollArea>
-            )}
-             {!isLoading && !error && (!details || details.length === 0) && (
-              <p className="text-center text-gray-500">جزئیاتی برای نمایش وجود ندارد.</p>
+            ) : (
+              <p className="text-center text-muted-foreground py-10">جزئیاتی برای این قرارداد یافت نشد.</p>
             )}
            </div>
         )}
 
-        <DialogFooter>
-          <Button type="button" onClick={() => (document.querySelector('[data-state="open"]') as HTMLElement)?.click()}>
+        <DialogFooter className="sm:justify-start">
+          <Button type="button" variant="secondary" onClick={() => setIsOpen(false)}>
             بستن
           </Button>
         </DialogFooter>

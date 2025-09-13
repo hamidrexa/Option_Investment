@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { SymbolDetailsModal } from "./SymbolDetailsModal";
-import { Contract, fetchSymbolContracts } from "@/services/symbolService";
+import { Contract } from "@/services/symbolService";
 import { useState } from "react";
 import { SymbolWithContracts } from "@/app/market-and-options/page";
 
@@ -16,60 +16,47 @@ interface SymbolCardProps {
 }
 
 const SymbolCard = ({ symbolData }: SymbolCardProps) => {
-  const [contracts, setContracts] = useState<Contract[]>(symbolData.contracts);
-  const [error, setError] = useState<string | null>(symbolData.error);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  const nonExpiredCount = contracts.filter((c) => !c.is_expired).length;
-
-  const handleCardClick = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const freshData = await fetchSymbolContracts(symbolData.id);
-      setContracts(freshData.contracts);
-    } catch (e) {
-      setError("خطا در بروزرسانی اطلاعات.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  // NOTE: The contracts are now managed inside the modal to ensure fresh data on open.
+  const [nonExpiredCount] = useState(
+    symbolData.contracts.filter((c) => !c.is_expired).length
+  );
+  const [error] = useState<string | null>(symbolData.error);
+  const [isLoading] = useState(false); // Loading is also managed inside modal
 
   return (
-    <div onClick={handleCardClick}>
-      <SymbolDetailsModal
-        symbolId={symbolData.id}
-        symbolName={symbolData.symbol}
-        initialContracts={contracts}
+    <SymbolDetailsModal
+      symbolId={symbolData.id}
+      symbolName={symbolData.symbol}
+      initialContracts={symbolData.contracts}
+      initialError={symbolData.error}
+    >
+      <Card
+        className="w-full hover:shadow-xl transition-shadow duration-300 cursor-pointer"
+        dir="rtl"
       >
-        <Card
-          className="w-full hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-          dir="rtl"
-        >
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-xl font-bold">
-              {symbolData.symbol}
-            </CardTitle>
-            {isLoading ? (
-              <Badge variant="secondary">در حال بروزرسانی...</Badge>
-            ) : error ? (
-              <Badge variant="destructive">خطا</Badge>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-xl font-bold">
+            {symbolData.symbol}
+          </CardTitle>
+          {isLoading ? (
+            <Badge variant="secondary">در حال بروزرسانی...</Badge>
+          ) : error ? (
+            <Badge variant="destructive">خطا</Badge>
+          ) : (
+            <Badge variant="outline">فعال: {nonExpiredCount}</Badge>
+          )}
+        </CardHeader>
+        <CardContent>
+          <div className="text-sm text-muted-foreground">
+            {error ? (
+              <p className="text-red-500">{error}</p>
             ) : (
-              <Badge variant="outline">فعال: {nonExpiredCount}</Badge>
+              <p>برای مشاهده جزئیات قراردادها کلیک کنید.</p>
             )}
-          </CardHeader>
-          <CardContent>
-            <div className="text-sm text-muted-foreground">
-              {error ? (
-                <p className="text-red-500">{error}</p>
-              ) : (
-                <p>برای مشاهده جزئیات قراردادها کلیک کنید.</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </SymbolDetailsModal>
-    </div>
+          </div>
+        </CardContent>
+      </Card>
+    </SymbolDetailsModal>
   );
 };
 
