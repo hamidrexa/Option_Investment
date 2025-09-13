@@ -2,7 +2,7 @@
 'use client';
 
 import SymbolCard from "./SymbolCard";
-import { SymbolWithContracts } from "@/app/market-and-options/page"; // Import the interface from page.tsx
+import { SymbolWithContracts } from "@/app/market-and-options/page";
 
 interface SymbolsTabProps {
   symbolsWithContracts: SymbolWithContracts[];
@@ -18,12 +18,7 @@ export const SymbolsTab = ({ symbolsWithContracts }: SymbolsTabProps) => {
       {symbolsWithContracts.map((symbolData) => (
         <SymbolCard
           key={symbolData.id}
-          symbol={{
-            id: symbolData.id,
-            symbol: symbolData.symbol,
-          }}
-          contracts={symbolData.contracts}
-          error={symbolData.error} // Pass the error prop
+          symbolData={symbolData}
         />
       ))}
     </div>

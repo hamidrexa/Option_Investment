@@ -1,9 +1,10 @@
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { OptionChainTab } from "@/components/market-and-options/OptionChainTab";
 import { MarketOverviewTab } from "@/components/market-and-options/MarketOverviewTab";
 import { AnalyticalMetrics } from "@/components/market-and-options/AnalyticalMetrics";
 import { SymbolsTab } from "@/components/market-and-options/SymbolsTab";
-import { fetchSymbolContracts, Contract, ApiResponse } from "@/services/symbolService";
+import { fetchSymbolContracts, Contract } from "@/services/symbolService";
 import symbolsData from "@/data/symbols.json";
 
 interface Symbol {
@@ -12,7 +13,6 @@ interface Symbol {
 }
 
 export interface SymbolWithContracts {
-  // CORRECT: Keep the id as a string for consistency
   id: string;
   symbol: string;
   contracts: Contract[];
@@ -25,23 +25,23 @@ export default async function MarketAndOptionsPage() {
 
   const symbolsWithContracts: SymbolWithContracts[] = await Promise.all(
     symbols.map(async (s) => {
-      // REMOVED: const symbolId = parseInt(s.id, 10);
-      let contractData: ApiResponse = { contracts: [], is_active: false };
+      let contracts: Contract[] = [];
+      let isActive = false;
       let error: string | null = null;
-
+      
       try {
-        // CORRECT: Pass the original string 's.id' directly to the service
-        contractData = await fetchSymbolContracts(s.id);
+        const data = await fetchSymbolContracts(s.id);
+        contracts = data.contracts;
+        isActive = data.is_active;
       } catch (e: any) {
-        console.error(`Error fetching contracts for ${s.symbol} (ID: ${s.id}):`, e);
-        error = e.message || "خطا در بارگذاری قراردادها";
+        error = e.message || "Failed to fetch initial data.";
       }
-
+      
       return {
-        id: s.id, // CORRECT: Return the original string id
+        id: s.id,
         symbol: s.symbol,
-        contracts: contractData.contracts || [],
-        is_active: contractData.is_active || false,
+        contracts: contracts,
+        is_active: isActive,
         error: error,
       };
     })
@@ -56,7 +56,9 @@ export default async function MarketAndOptionsPage() {
           <TabsTrigger value="option-chain">زنجیره اختیار معامله</TabsTrigger>
           <TabsTrigger value="analytical-metrics">سنجه های تحلیلی</TabsTrigger>
         </TabsList>
-        {/* Make sure SymbolsTab is also expecting id as a string */}
+        <TabsContent value="market-overview">
+          <MarketOverviewTab />
+        </TabsContent>
         <TabsContent value="symbols">
           <SymbolsTab symbolsWithContracts={symbolsWithContracts} />
         </TabsContent>
