@@ -1,3 +1,8 @@
+/// contracts 
+export interface ApiResponse {
+  contracts: Contract[];
+  is_active: boolean;
+}
 export interface Contract {
   mature: number;
   expire_date: string;
@@ -5,13 +10,62 @@ export interface Contract {
   is_expired: boolean;
 }
 
-export interface ApiResponse {
-  contracts: Contract[];
+
+/// contract with option
+export interface ApiDetailsResponse {
+  contracts: DetailedContract[];
+  pc: number;
+  pl: number;
+  py: number;
   is_active: boolean;
 }
 
-export interface ContractDetail {
-  [key: string]: string | number | boolean;
+export interface DetailedContract {
+  mature: number;
+  expire_date: string;
+  options: Option[];
+  create_time: string;
+  is_expired: boolean;
+}
+
+export interface Option {
+  tse_url: string;
+  blackscholes: number;
+  bp: number;
+  delta: number;
+  gamma: number;
+  l18: string;
+  l30: string;
+  lever: number;
+  margin: number;
+  pc: number;
+  pl: number;
+  position: number;
+  ppc: number;
+  ppl: number;
+  rho: number;
+  shekaf_gheymat: number;
+  soud_az_foroush: number;
+  status: string;
+  stock: number;
+  strike: number;
+  theta: number;
+  through: number;
+  to_black: number;
+  tval: number;
+  tvol: number;
+  vega: number;
+  transaction: Transaction;
+  contract?: number;
+}
+
+export interface Transaction {
+  "1": {
+    buy: number;
+    sell: number;
+    sellVol: number;
+    buyVol: number;
+  };
 }
 
 export const fetchSymbolContracts = async (symbolId: string): Promise<ApiResponse> => {
@@ -35,8 +89,7 @@ export const fetchSymbolContracts = async (symbolId: string): Promise<ApiRespons
   }
 };
 
-// --- LOGGING HAS BEEN ADDED TO THIS FUNCTION ---
-export const fetchContractDetails = async (symbolId: string, expireDate: string): Promise<ContractDetail[]> => {
+export const fetchContractDetails = async (symbolId: string, expireDate: string): Promise<ApiDetailsResponse> => {
   
   const url = `https://api.binazirchart.ir/market_information/symbol_info?base_tse_url=${symbolId}&contract_expire_date=${expireDate}`;
 
@@ -51,7 +104,7 @@ export const fetchContractDetails = async (symbolId: string, expireDate: string)
     if (contentType && contentType.indexOf("application/json") === -1) {
       throw new Error("Received non-JSON response from API");
     }
-    const data: ContractDetail[] = await response.json();
+    const data: ApiDetailsResponse = await response.json();
     
     return data;
   } catch (error) {

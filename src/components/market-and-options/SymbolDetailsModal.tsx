@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Contract, ContractDetail, fetchContractDetails, fetchSymbolContracts } from "@/services/symbolService";
+import { Contract, DetailedContract, fetchContractDetails, fetchSymbolContracts } from "@/services/symbolService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -34,7 +34,7 @@ export function SymbolDetailsModal({
   const [view, setView] = useState<'list' | 'details'>('list');
   
   const [contracts, setContracts] = useState<Contract[]>(initialContracts);
-  const [details, setDetails] = useState<ContractDetail[] | null>(null);
+  const [details, setDetails] = useState<DetailedContract[] | null>(null);
 
   const [isListLoading, setIsListLoading] = useState(false);
   const [isDetailsLoading, setIsDetailsLoading] = useState(false);
@@ -42,8 +42,11 @@ export function SymbolDetailsModal({
   const [listError, setListError] = useState<string | null>(initialError);
   const [detailsError, setDetailsError] = useState<string | null>(null);
   
+  const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
   const [selectedContractDate, setSelectedContractDate] = useState('');
 
+  const activeContracts = contracts.filter(contract => !contract.is_expired);
+  const expiredContracts = contracts.filter(contract => contract.is_expired);
 
   const fetchAndSetContracts = async () => {
     setIsListLoading(true);
@@ -72,9 +75,10 @@ export function SymbolDetailsModal({
     }
   }, [isOpen, initialContracts, initialError, symbolId]);
 
-  const handleDateSelect = async (contract: Contract) => {
+  const fetchDetailsForDate = async (contract: Contract) => {
     setIsDetailsLoading(true);
     setDetailsError(null);
+    setSelectedContract(contract);
     setSelectedContractDate(new Date(contract.expire_date).toLocaleDateString("fa-IR"));
     
     const dateObject = new Date(contract.expire_date);
@@ -85,13 +89,32 @@ export function SymbolDetailsModal({
 
     try {
       const result = await fetchContractDetails(symbolId, formattedExpireDate);
-      setDetails(result);
+      const selectedDate = new Date(contract.expire_date);
+
+      const filteredContracts = result.contracts.filter(c => {
+        const contractDate = new Date(c.expire_date);
+        return contractDate.getFullYear() === selectedDate.getFullYear() &&
+               contractDate.getMonth() === selectedDate.getMonth() &&
+               contractDate.getDate() === selectedDate.getDate();
+      });
+
+      setDetails(filteredContracts);
       setView('details');
     } catch (e) {
       setDetailsError("خطا در دریافت جزئیات قرارداد. لطفاً دوباره تلاش کنید.");
       setDetails(null);
     } finally {
       setIsDetailsLoading(false);
+    }
+  };
+
+  const handleDateSelect = (contract: Contract) => {
+    fetchDetailsForDate(contract);
+  };
+
+  const handleRefreshDetails = () => {
+    if (selectedContract) {
+      fetchDetailsForDate(selectedContract);
     }
   };
 
@@ -125,7 +148,7 @@ export function SymbolDetailsModal({
 
         {view === 'list' && (
           <div className="space-y-4">
-            <div className="flex justify-end">
+            <div className="flex justify-start">
                 <Button onClick={fetchAndSetContracts} variant="outline" size="sm" disabled={isListLoading}>
                     <RefreshCw className={`ml-2 h-4 w-4 ${isListLoading ? 'animate-spin' : ''}`} />
                     بروزرسانی
@@ -143,25 +166,57 @@ export function SymbolDetailsModal({
               <ScrollArea className="h-96 w-full rounded-md border">
                 <div className="p-4">
                   {contracts.length > 0 ? (
-                    contracts.map((contract, index) => (
-                      <div
-                        key={index}
-                        onClick={() => handleDateSelect(contract)}
-                        className="flex items-center justify-between p-3 mb-2 bg-muted/50 rounded-lg hover:bg-accent cursor-pointer transition-colors"
-                      >
-                        <div className="flex flex-col">
-                          <span className="font-semibold">
-                            {new Date(contract.expire_date).toLocaleDateString("fa-IR", { year: 'numeric', month: 'long', day: 'numeric' })}
-                          </span>
-                           <span className="text-sm text-muted-foreground">
-                            {`${contract.mature} روز تا سررسید`}
-                          </span>
+                    <>
+                      <h3 className="text-lg font-semibold text-right mb-2">قراردادهای فعال</h3>
+                      {activeContracts.length > 0 ? (
+                        activeContracts.map((contract, index) => (
+                          <div
+                            key={`active-${index}`}
+                            onClick={() => handleDateSelect(contract)}
+                            className="flex items-center justify-between p-3 mb-2 bg-muted/50 rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                          >
+                            <div className="flex flex-col text-right">
+                              <span className="font-semibold">
+                                {new Date(contract.expire_date).toLocaleDateString("fa-IR", { year: 'numeric', month: 'long', day: 'numeric' })}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {`${contract.mature} روز تا سررسید`}
+                              </span>
+                            </div>
+                            <Badge variant={"default"}>
+                              فعال
+                            </Badge>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-center text-muted-foreground py-4">قرارداد فعالی وجود ندارد.</p>
+                      )}
+
+                      {expiredContracts.length > 0 && (
+                        <div className="mt-6">
+                          <h3 className="text-lg font-semibold text-right mb-2">قراردادهای منقضی شده</h3>
+                          {expiredContracts.map((contract, index) => (
+                            <div
+                              key={`expired-${index}`}
+                              onClick={() => handleDateSelect(contract)}
+                              className="flex items-center justify-between p-3 mb-2 bg-muted/50 rounded-lg hover:bg-accent cursor-pointer transition-colors"
+                            >
+                              <div className="flex flex-col text-right">
+                                <span className="font-semibold">
+                                  {new Date(contract.expire_date).toLocaleDateString("fa-IR", { year: 'numeric', month: 'long', day: 'numeric' })}
+                                </span>
+                                <span className="text-sm text-muted-foreground">
+                                  {`${contract.mature} روز تا سررسید`}
+                                </span>
+                              </div>
+                              <Badge variant={"destructive"}>
+                                منقضی شده
+                              </Badge>
+                            </div>
+                          ))}
                         </div>
-                        <Badge variant={contract.is_expired ? "destructive" : "default"}>
-                          {contract.is_expired ? "منقضی شده" : "فعال"}
-                        </Badge>
-                      </div>
-                    ))
+                      )}
+                    </>
                   ) : (
                     <p className="text-center text-muted-foreground py-10">قراردادی برای نمایش وجود ندارد.</p>
                   )}
@@ -172,31 +227,43 @@ export function SymbolDetailsModal({
         )}
         
         {view === 'details' && (
-           <div className="p-4">
-            <Button onClick={handleBackToList} variant="outline" className="mb-4">
-                <ArrowRightIcon className="ml-2 h-4 w-4" /> بازگشت به لیست
-            </Button>
+           <div className="p-4 space-y-4">
+            <div className="flex justify-between items-center">
+              <Button onClick={handleBackToList} variant="outline">
+                  بازگشت به لیست <ArrowRightIcon className="mr-2 h-4 w-4" />
+              </Button>
+              <Button onClick={handleRefreshDetails} variant="outline" size="sm" disabled={isDetailsLoading}>
+                    <RefreshCw className={`ml-2 h-4 w-4 ${isDetailsLoading ? 'animate-spin' : ''}`} />
+                    بروزرسانی
+                </Button>
+            </div>
             {isDetailsLoading ? (
                 <div className="p-4"><Skeleton className="h-80 w-full" /></div>
             ): detailsError ? (
                 <p className="text-center text-red-500 py-10">{detailsError}</p>
-            ) : details && details.length > 0 ? (
-              <ScrollArea className="h-80 border rounded-md">
-                <Table>
+            ) : details && details.length > 0 && details[0].options.length > 0 ? (
+              <ScrollArea className="h-[60vh] border rounded-md">
+                <Table dir="rtl">
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-right">عنوان</TableHead>
-                      <TableHead className="text-right">مقدار</TableHead>
+                      <TableHead className="text-right">نماد</TableHead>
+                      <TableHead className="text-right">نوع</TableHead>
+                      <TableHead className="text-right">قیمت اعمال</TableHead>
+                      <TableHead className="text-right">آخرین قیمت</TableHead>
+                      <TableHead className="text-right">اهرم</TableHead>
+                      <TableHead className="text-right">فاصله تا سررسید</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {details.map((detail, index) => (
-                      Object.entries(detail).map(([key, value]) => (
-                        <TableRow key={`${index}-${key}`}>
-                          <TableCell className="font-medium">{key}</TableCell>
-                          <TableCell className="text-left" dir="ltr">{renderDetailValue(value)}</TableCell>
-                        </TableRow>
-                      ))
+                    {details[0].options.map((option, index) => (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium text-right">{option.l18}</TableCell>
+                        <TableCell className="text-right">{option.status === 'put' ? 'فروش' : 'خرید'}</TableCell>
+                        <TableCell className="text-right">{option.strike.toLocaleString('fa-IR')}</TableCell>
+                        <TableCell className="text-right">{option.pl.toLocaleString('fa-IR')}</TableCell>
+                        <TableCell className="text-right">{option.lever.toFixed(2)}</TableCell>
+                        <TableCell className="text-right">{details[0].mature} روز</TableCell>
+                      </TableRow>
                     ))}
                   </TableBody>
                 </Table>
@@ -207,7 +274,7 @@ export function SymbolDetailsModal({
            </div>
         )}
 
-        <DialogFooter className="sm:justify-start">
+        <DialogFooter className="sm:justify-end">
           <Button type="button" variant="secondary" onClick={() => setIsOpen(false)}>
             بستن
           </Button>
