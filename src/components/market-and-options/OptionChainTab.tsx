@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useOptionChain } from '@/context/OptionChainContext';
 import {
   Table,
@@ -20,6 +20,9 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Option } from '@/services/symbolService';
 import { ScrollArea } from '../ui/scroll-area';
+import { Button } from '../ui/button';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
+import { ListFilter } from 'lucide-react';
 
 const callColumns = [
   { accessor: 'l18', header: 'نماد' },
@@ -53,25 +56,37 @@ const formatValue = (value: any) => {
 
 export function OptionChainTab() {
   const { data, isLoading, error, selectedSymbol, selectedDate } = useOptionChain();
+  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>(
+    callColumns.reduce((acc, col) => ({ ...acc, [col.accessor]: true }), {})
+  );
 
   const groupedOptions = useMemo(() => {
-    if (!data || data.length === 0 || !data[0].options) return new Map();
+    if (!data || data.length === 0 || !data[0].options) {
+      console.log("No data or options available for grouping.");
+      return new Map();
+    }
+    console.log("Data received in OptionChainTab for grouping:", data);
 
     const grouped = new Map<number, { call?: Option, put?: Option }>();
     
     data[0].options.forEach(option => {
       const strike = option.strike;
       const existing = grouped.get(strike) || {};
-      if (option.status === 'call') {
+      // Bug fix: Use l30 to determine option type as requested by user
+      if (option.l30.includes('اختيارخ')) { // 'خ' for 'خرید' (Call)
         existing.call = option;
-      } else if (option.status === 'put') {
+      } else if (option.l30.includes('اختيارف')) { // 'ف' for 'فروش' (Put)
         existing.put = option;
       }
       grouped.set(strike, existing);
     });
 
+    console.log("Grouped options by strike:", grouped);
     return new Map([...grouped.entries()].sort((a, b) => a[0] - b[0]));
   }, [data]);
+
+  const visibleCallColumns = callColumns.filter(col => visibleColumns[col.accessor]);
+  const visiblePutColumns = putColumns.filter(col => visibleColumns[col.accessor]);
 
   if (isLoading) {
     return (
@@ -98,77 +113,114 @@ export function OptionChainTab() {
 
   return (
     <Card dir="rtl">
-        <CardHeader>
-            <CardTitle>{`زنجیره اختیار معامله برای ${selectedSymbol}`}</CardTitle>
-            <CardDescription>{`تاریخ سررسید: ${selectedDate} - تعداد کل قراردادها: ${data[0].options.length}`}</CardDescription>
+        <CardHeader className="flex-col md:flex-row justify-between items-start md:items-center">
+            <div>
+                <CardTitle>{`زنجیره اختیار معامله برای ${selectedSymbol}`}</CardTitle>
+                <CardDescription>{`تاریخ سررسید: ${selectedDate} - تعداد کل قراردادها: ${data[0].options.length}`}</CardDescription>
+            </div>
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline">
+                        <ListFilter className="ml-2 h-4 w-4" />
+                        انتخاب ستون‌ها
+                    </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                    {callColumns.map(col => (
+                        <DropdownMenuCheckboxItem
+                            key={col.accessor}
+                            className="text-right"
+                            checked={visibleColumns[col.accessor]}
+                            onCheckedChange={(checked) =>
+                                setVisibleColumns(prev => ({ ...prev, [col.accessor]: !!checked }))
+                            }
+                        >
+                            {col.header}
+                        </DropdownMenuCheckboxItem>
+                    ))}
+                </DropdownMenuContent>
+            </DropdownMenu>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[70vh] w-full">
-            <div className="flex justify-between">
-                {/* Calls Table (Right) */}
-                <div className="w-[45%]">
-                    <h3 className="text-lg font-semibold text-center mb-2 text-green-600">اختیار خرید (Calls)</h3>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                {callColumns.map(col => <TableHead key={`call-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Array.from(groupedOptions.keys()).map(strike => (
-                                <TableRow key={`call-row-${strike}`}>
-                                    {callColumns.map(col => (
-                                        <TableCell key={`call-cell-${strike}-${col.accessor}`} className="text-right text-xs">
-                                            {groupedOptions.get(strike)?.call ? formatValue((groupedOptions.get(strike)!.call as any)[col.accessor]) : '-'}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
+          {/* Desktop View */}
+          <ScrollArea className="h-[75vh] w-full hidden md:block" type="auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {visiblePutColumns.map(col => <TableHead key={`put-header-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
+                  <TableHead className="text-center font-bold sticky right-0 left-0 bg-muted z-20">قیمت اعمال</TableHead>
+                  {visibleCallColumns.map(col => <TableHead key={`call-header-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from(groupedOptions.keys()).map(strike => (
+                  <TableRow key={`desktop-row-${strike}`}>
+                    {/* Puts */}
+                    {visiblePutColumns.map(col => (
+                      <TableCell key={`put-cell-${strike}-${col.accessor}`} className="text-right text-xs">
+                        {groupedOptions.get(strike)?.put ? formatValue((groupedOptions.get(strike)!.put as any)[col.accessor]) : '-'}
+                      </TableCell>
+                    ))}
+                    {/* Strike */}
+                    <TableCell className="font-semibold text-center bg-muted sticky right-0 left-0 z-10">
+                      {strike.toLocaleString('fa-IR')}
+                    </TableCell>
+                    {/* Calls */}
+                    {visibleCallColumns.map(col => (
+                      <TableCell key={`call-cell-${strike}-${col.accessor}`} className="text-right text-xs">
+                        {groupedOptions.get(strike)?.call ? formatValue((groupedOptions.get(strike)!.call as any)[col.accessor]) : '-'}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </ScrollArea>
 
-                {/* Strike Price Column (Center) */}
-                <div className="w-[10%] flex flex-col items-center pt-12">
-                     <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="text-center font-bold">قیمت اعمال</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Array.from(groupedOptions.keys()).map(strike => (
-                                <TableRow key={`strike-row-${strike}`}>
-                                    <TableCell className="text-center font-semibold bg-muted">{strike.toLocaleString('fa-IR')}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-
-                {/* Puts Table (Left) */}
-                <div className="w-[45%]">
-                    <h3 className="text-lg font-semibold text-center mb-2 text-red-600">اختیار فروش (Puts)</h3>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                {putColumns.map(col => <TableHead key={`put-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {Array.from(groupedOptions.keys()).map(strike => (
-                                <TableRow key={`put-row-${strike}`}>
-                                    {putColumns.map(col => (
-                                        <TableCell key={`put-cell-${strike}-${col.accessor}`} className="text-right text-xs">
-                                            {groupedOptions.get(strike)?.put ? formatValue((groupedOptions.get(strike)!.put as any)[col.accessor]) : '-'}
-                                        </TableCell>
-                                    ))}
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </div>
-            </div>
+          {/* Mobile View */}
+          <ScrollArea className="h-[75vh] w-full md:hidden" type="auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center">قیمت اعمال</TableHead>
+                  <TableHead className="text-center">اختیار خرید (Call)</TableHead>
+                  <TableHead className="text-center">اختیار فروش (Put)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.from(groupedOptions.keys()).map(strike => (
+                  <TableRow key={`mobile-row-${strike}`}>
+                    <TableCell className="font-semibold text-center bg-muted">{strike.toLocaleString('fa-IR')}</TableCell>
+                    <TableCell>
+                      {groupedOptions.get(strike)?.call ? (
+                        <div className="space-y-1">
+                          {visibleCallColumns.map(col => (
+                            <div key={`mobile-call-${strike}-${col.accessor}`} className="text-xs flex justify-between">
+                              <span className="font-semibold">{col.header}:</span>
+                              <span>{formatValue((groupedOptions.get(strike)!.call as any)[col.accessor])}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : '-'
+                      }
+                    </TableCell>
+                    <TableCell>
+                      {groupedOptions.get(strike)?.put ? (
+                        <div className="space-y-1">
+                          {visiblePutColumns.map(col => (
+                            <div key={`mobile-put-${strike}-${col.accessor}`} className="text-xs flex justify-between">
+                              <span className="font-semibold">{col.header}:</span>
+                              <span>{formatValue((groupedOptions.get(strike)!.put as any)[col.accessor])}</span>
+                            </div>
+                          ))}
+                        </div>
+                      ) : '-'
+                      }
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </ScrollArea>
         </CardContent>
     </Card>

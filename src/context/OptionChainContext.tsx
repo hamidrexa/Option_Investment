@@ -39,6 +39,7 @@ export const OptionChainProvider = ({ children }: { children: ReactNode }) => {
                contractDate.getDate() === selectedDateObj.getDate();
       });
 
+      console.log("Filtered contracts in context:", filteredContracts);
       setData(filteredContracts);
       setSelectedSymbol(symbolId);
       setSelectedDate(new Date(expireDate).toLocaleDateString("fa-IR"));
