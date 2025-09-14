@@ -1,13 +1,7 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { useMemo } from 'react';
+import { useOptionChain } from '@/context/OptionChainContext';
 import {
   Table,
   TableBody,
@@ -17,226 +11,166 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import optionChainsData from '@/data/seed/option-chains.json'; // Changed to default import
-import { Separator } from '@/components/ui/separator';
-import { ListFilter, FileCog } from 'lucide-react';
-import { AnalyticalMetrics } from './AnalyticalMetrics';
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Option } from '@/services/symbolService';
+import { ScrollArea } from '../ui/scroll-area';
 
-// Mock data for underlying asset price
-const UNDERLYING_PRICE = 150.0;
-
-const allColumns = [
-    { id: 'symbol', label: 'نماد' },
-    { id: 'last', label: 'آخرین قیمت' }, 
-    { id: 'change', label: 'تغییر' }, 
-    { id: 'bid', label: 'خرید' },
-    { id: 'ask', label: 'فروش' },
-    { id: 'volume', label: 'حجم معاملات' },
-    { id: 'openInterest', label: 'موقعیت‌های باز' },
-    { id: 'impliedVol', label: 'نوسان ضمنی' }, 
-    { id: 'delta', label: 'دلتا' },
-    { id: 'gamma', label: 'گاما' },
-    { id: 'vega', label: 'وگا' },
-    { id: 'theta', label: 'تتا' },
+const callColumns = [
+  { accessor: 'l18', header: 'نماد' },
+  { accessor: 'pc', header: 'پایانی' },
+  { accessor: 'pl', header: 'آخرین' },
+  { accessor: 'status', header: 'وضعیت' },
+  { accessor: 'tvol', header: 'حجم' },
+  { accessor: 'tval', header: 'ارزش معاملات' },
+  { accessor: 'position', header: 'موقعیت باز' },
+  { accessor: 'shekaf_gheymat', header: 'شکاف قیمت' },
+  { accessor: 'blackscholes', header: 'بلک شولز' },
+  { accessor: 'lever', header: 'اهرم' },
+  { accessor: 'delta', header: 'دلتا' },
+  { accessor: 'gamma', header: 'گاما' },
+  { accessor: 'margin', header: 'حاشیه سود' },
+  { accessor: 'rho', header: 'رو' },
+  { accessor: 'theta', header: 'تتا' },
+  { accessor: 'vega', header: 'وگا' },
 ];
 
+const putColumns = [...callColumns].slice().reverse();
+
+const formatValue = (value: any) => {
+    if (typeof value === 'number') {
+        return value.toLocaleString('fa-IR', { maximumFractionDigits: 2 });
+    }
+    if (value === 'call') return 'خرید';
+    if (value === 'put') return 'فروش';
+    return value;
+}
+
 export function OptionChainTab() {
-  const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
-    symbol: true,
-    last: true,
-    change: true,
-    bid: true,
-    ask: true,
-    volume: true,
-    openInterest: true,
-    impliedVol: true,
-    delta: false,
-    gamma: false,
-    vega: false,
-    theta: false,
-  });
+  const { data, isLoading, error, selectedSymbol, selectedDate } = useOptionChain();
 
-  const [sortBy, setSortBy] = useState('strike');
-  const [minStrike, setMinStrike] = useState('');
-  const [maxStrike, setMaxStrike] = useState('');
+  const groupedOptions = useMemo(() => {
+    if (!data || data.length === 0 || !data[0].options) return new Map();
 
-  const expirationDates = useMemo(() => {
-    // Accessing contracts array within the "خودرو" key using the default import
-    const contracts = optionChainsData.خودرو?.contracts || [];
-    const dates = new Set(contracts.map((c: any) => c.expiry)); 
-    return Array.from(dates).sort();
-  }, []);
+    const grouped = new Map<number, { call?: Option, put?: Option }>();
+    
+    data[0].options.forEach(option => {
+      const strike = option.strike;
+      const existing = grouped.get(strike) || {};
+      if (option.status === 'call') {
+        existing.call = option;
+      } else if (option.status === 'put') {
+        existing.put = option;
+      }
+      grouped.set(strike, existing);
+    });
 
-  const getOptionStatus = (type: 'call' | 'put', strike: number) => {
-    const price = UNDERLYING_PRICE;
-    if (Math.abs(price - strike) < 5) return 'atm'; // At-the-Money
-    if ((type === 'call' && strike < price) || (type === 'put' && strike > price)) {
-      return 'itm'; // In-the-Money
-    }
-    return 'otm'; // Out-of-the-Money
-  };
+    return new Map([...grouped.entries()].sort((a, b) => a[0] - b[0]));
+  }, [data]);
 
-  const getStatusColorClass = (status: 'itm' | 'atm' | 'otm') => {
-    switch (status) {
-      case 'itm':
-        return 'bg-blue-100 dark:bg-blue-900/50';
-      case 'atm':
-        return 'bg-yellow-100 dark:bg-yellow-900/50';
-      case 'otm':
-        return 'bg-red-100 dark:bg-red-900/50';
-      default:
-        return '';
-    }
-  };
+  if (isLoading) {
+    return (
+        <div className="p-4 space-y-4">
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-96 w-full" />
+        </div>
+    );
+  }
 
+  if (error) {
+    return <p className="text-center text-red-500 py-10">{error}</p>;
+  }
 
-  const renderOptionsTable = (options: any[], type: 'call' | 'put') => (
-    <div className="w-1/2 px-2">
-      <h3 className="text-lg font-bold text-center mb-2">{type === 'call' ? 'اختیار خرید (Calls)' : 'اختیار فروش (Puts)'}</h3>
-      <div className="overflow-x-auto border rounded-md">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {allColumns.filter(c => visibleColumns[c.id]).map(col => <TableHead key={col.id}>{col.label}</TableHead>)}
-              <TableHead className="text-center">قیمت اعمال</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {options.map((option) => {
-               const status = getOptionStatus(type, option.strike);
-               const colorClass = getStatusColorClass(status);
-               return (
-                <TableRow key={option.id} className={colorClass}> 
-                    {allColumns.filter(c => visibleColumns[c.id]).map(col => <TableCell key={col.id}>{option[col.id]}</TableCell>)}
-                    <TableCell className="font-semibold text-center bg-muted/50">{option.strike}</TableCell>
-                </TableRow>
-            )})}
-          </TableBody>
-        </Table>
+  if (!data || groupedOptions.size === 0) {
+    return (
+      <div className="text-center py-10" dir="rtl">
+        <p className="text-muted-foreground">
+          برای مشاهده زنجیره اختیار معامله، لطفاً یک نماد و قرارداد را از تب 'نمادها' انتخاب کنید.
+        </p>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>زنجیره اختیار معامله</CardTitle>
-        <CardDescription>
-          زنجیره های آپشن را بر اساس تاریخ سررسید مشاهده، مرتب و فیلتر کنید.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="flex flex-wrap items-center gap-4 p-4 border rounded-md bg-muted/50">
-            <h4 className="font-semibold">فیلترها و نمایش</h4>
-            <Separator orientation="vertical" className="h-10 hidden md:block" />
-            <div className="flex items-center gap-2">
-                <Label htmlFor="min-strike">از قیمت اعمال</Label>
-                <Input id="min-strike" type="number" placeholder="مثال: 140" className="w-28" value={minStrike} onChange={e => setMinStrike(e.target.value)} />
-            </div>
-            <div className="flex items-center gap-2">
-                <Label htmlFor="max-strike">تا قیمت اعمال</Label>
-                <Input id="max-strike" type="number" placeholder="مثال: 160" className="w-28" value={maxStrike} onChange={e => setMaxStrike(e.target.value)} />
-            </div>
-            <div className="flex items-center gap-2">
-                <Label>مرتب سازی بر اساس</Label>
-                 <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="w-36">
-                        <SelectValue placeholder="انتخاب ستون" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="strike">قیمت اعمال</SelectItem>
-                        <SelectItem value="volume">حجم معاملات</SelectItem>
-                        <SelectItem value="openInterest">موقعیت‌های باز</SelectItem>
-                        <SelectItem value="impliedVol">نوسان ضمنی</SelectItem> 
-                        <SelectItem value="delta">دلتا</SelectItem>
-                        <SelectItem value="gamma">گاما</SelectItem>
-                        <SelectItem value="vega">وگا</SelectItem>
-                        <SelectItem value="theta">تتا</SelectItem>
-                    </SelectContent>
-                </Select>
-            </div>
-             <Separator orientation="vertical" className="h-10 hidden md:block" />
-             <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="ml-auto">
-                        <FileCog className="ml-2 h-4 w-4" />
-                        سفارشی سازی ستون‌ها
-                    </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                    {allColumns.map(col => (
-                         <DropdownMenuCheckboxItem
-                            key={col.id}
-                            checked={visibleColumns[col.id]}
-                            onCheckedChange={(checked) => setVisibleColumns(prev => ({...prev, [col.id]: checked}))}
-                         >
-                            {col.label}
-                        </DropdownMenuCheckboxItem>
-                    ))}
-                </DropdownMenuContent>
-            </DropdownMenu>
-        </div>
-
-        <Tabs defaultValue={expirationDates[0]}>
-          <TabsList>
-            {expirationDates.map((date) => (
-              <TabsTrigger key={date} value={date}>
-                {new Date(date).toLocaleDateString('fa-IR', { month: 'long', day: 'numeric' })}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {expirationDates.map((date) => {
-            // Accessing contracts array within the "خودرو" key
-            let chain = (optionChainsData.خودرو?.contracts || []).filter((c: any) => c.expiry === date);
-            
-            // Apply Filters
-            if (minStrike) chain = chain.filter((c: any) => c.strike >= parseFloat(minStrike));
-            if (maxStrike) chain = chain.filter((c: any) => c.strike <= parseFloat(maxStrike));
-
-            // Apply Sorting
-            chain.sort((a: any, b: any) => {
-                if (sortBy === 'strike') return a.strike - b.strike;
-                // For other numeric sorts
-                return b[sortBy] - a[sortBy];
-            });
-
-            const calls = chain.filter((c: any) => c.type === 'call');
-            const puts = chain.filter((c: any) => c.type === 'put');
-
-            return (
-              <TabsContent key={date} value={date}>
-                <div className="flex w-full">
-                  {renderOptionsTable(calls, 'call')}
-                  {renderOptionsTable(puts, 'put')}
+    <Card dir="rtl">
+        <CardHeader>
+            <CardTitle>{`زنجیره اختیار معامله برای ${selectedSymbol}`}</CardTitle>
+            <CardDescription>{`تاریخ سررسید: ${selectedDate} - تعداد کل قراردادها: ${data[0].options.length}`}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ScrollArea className="h-[70vh] w-full">
+            <div className="flex justify-between">
+                {/* Calls Table (Right) */}
+                <div className="w-[45%]">
+                    <h3 className="text-lg font-semibold text-center mb-2 text-green-600">اختیار خرید (Calls)</h3>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                {callColumns.map(col => <TableHead key={`call-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from(groupedOptions.keys()).map(strike => (
+                                <TableRow key={`call-row-${strike}`}>
+                                    {callColumns.map(col => (
+                                        <TableCell key={`call-cell-${strike}-${col.accessor}`} className="text-right text-xs">
+                                            {groupedOptions.get(strike)?.call ? formatValue((groupedOptions.get(strike)!.call as any)[col.accessor]) : '-'}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
                 </div>
-              </TabsContent>
-            );
-          })}
-        </Tabs>
-        <Separator />
-        <AnalyticalMetrics />
-      </CardContent>
+
+                {/* Strike Price Column (Center) */}
+                <div className="w-[10%] flex flex-col items-center pt-12">
+                     <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="text-center font-bold">قیمت اعمال</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from(groupedOptions.keys()).map(strike => (
+                                <TableRow key={`strike-row-${strike}`}>
+                                    <TableCell className="text-center font-semibold bg-muted">{strike.toLocaleString('fa-IR')}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+
+                {/* Puts Table (Left) */}
+                <div className="w-[45%]">
+                    <h3 className="text-lg font-semibold text-center mb-2 text-red-600">اختیار فروش (Puts)</h3>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                {putColumns.map(col => <TableHead key={`put-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {Array.from(groupedOptions.keys()).map(strike => (
+                                <TableRow key={`put-row-${strike}`}>
+                                    {putColumns.map(col => (
+                                        <TableCell key={`put-cell-${strike}-${col.accessor}`} className="text-right text-xs">
+                                            {groupedOptions.get(strike)?.put ? formatValue((groupedOptions.get(strike)!.put as any)[col.accessor]) : '-'}
+                                        </TableCell>
+                                    ))}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
+          </ScrollArea>
+        </CardContent>
     </Card>
   );
-}
+};
