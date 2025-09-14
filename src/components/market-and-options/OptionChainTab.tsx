@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { useOptionChain } from '@/context/OptionChainContext';
 import {
   Table,
@@ -23,6 +23,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { Button } from '../ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '../ui/dropdown-menu';
 import { ListFilter } from 'lucide-react';
+import symbolsData from '@/data/symbols.json';
 
 const callColumns = [
   { accessor: 'l18', header: 'نماد' },
@@ -43,7 +44,11 @@ const callColumns = [
   { accessor: 'vega', header: 'وگا' },
 ];
 
-const putColumns = [...callColumns].slice().reverse();
+// Put columns should have 'نماد' as the rightmost column (closest to strike)
+const putColumns = [...callColumns];
+
+// Call columns should be reversed so 'نماد' is closest to strike (leftmost)
+const callColumnsReversed = [...callColumns].reverse();
 
 const formatValue = (value: any) => {
     if (typeof value === 'number') {
@@ -52,6 +57,19 @@ const formatValue = (value: any) => {
     if (value === 'call') return 'خرید';
     if (value === 'put') return 'فروش';
     return value;
+}
+
+const getSymbolName = (symbolId: string): string => {
+  const symbol = symbolsData.find(s => s.id === symbolId);
+  return symbol ? symbol.symbol : symbolId;
+}
+
+const calculateDaysUntilExpiration = (expireDate: string): number => {
+  const today = new Date();
+  const expire = new Date(expireDate);
+  const timeDiff = expire.getTime() - today.getTime();
+  const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+  return Math.max(0, daysDiff);
 }
 
 export function OptionChainTab() {
@@ -85,8 +103,68 @@ export function OptionChainTab() {
     return new Map([...grouped.entries()].sort((a, b) => a[0] - b[0]));
   }, [data]);
 
-  const visibleCallColumns = callColumns.filter(col => visibleColumns[col.accessor]);
+  const visibleCallColumns = callColumnsReversed.filter(col => visibleColumns[col.accessor]);
   const visiblePutColumns = putColumns.filter(col => visibleColumns[col.accessor]);
+
+  
+  // For put table: 'نماد' should be the rightmost column (last in array for RTL)
+  const visiblePutColumnsOrdered = useMemo(() => {
+    const cols = visiblePutColumns.slice();
+    const idx = cols.findIndex(c => c.accessor === 'l18');
+    if (idx > -1) {
+      const [namad] = cols.splice(idx, 1);
+      cols.push(namad); // Put 'نماد' at the end (rightmost in RTL)
+    }
+    return cols;
+  }, [visiblePutColumns]);
+
+  // For call table: 'نماد' should be the leftmost column (first in array)
+  const visibleCallColumnsOrdered = useMemo(() => {
+    const cols = visibleCallColumns.slice();
+    const idx = cols.findIndex(c => c.accessor === 'l18');
+    if (idx > -1) {
+      const [namad] = cols.splice(idx, 1);
+      cols.unshift(namad); // Put 'نماد' at the beginning (leftmost)
+    }
+    return cols;
+  }, [visibleCallColumns]);
+
+  // Refs to sync horizontal scroll between put and call tables
+  const putScrollRef = useRef<HTMLDivElement>(null);
+  const callScrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const putTable = putScrollRef.current;
+    const callTable = callScrollRef.current;
+    
+    if (!putTable || !callTable) return;
+    
+    let isSyncing = false;
+    
+    const syncPutToCall = (e: Event) => {
+      if (isSyncing) return;
+      isSyncing = true;
+      const target = e.target as HTMLElement;
+      callTable.scrollLeft = target.scrollLeft;
+      setTimeout(() => { isSyncing = false; }, 0);
+    };
+    
+    const syncCallToPut = (e: Event) => {
+      if (isSyncing) return;
+      isSyncing = true;
+      const target = e.target as HTMLElement;
+      putTable.scrollLeft = target.scrollLeft;
+      setTimeout(() => { isSyncing = false; }, 0);
+    };
+    
+    putTable.addEventListener('scroll', syncPutToCall, { passive: true });
+    callTable.addEventListener('scroll', syncCallToPut, { passive: true });
+    
+    return () => {
+      putTable.removeEventListener('scroll', syncPutToCall);
+      callTable.removeEventListener('scroll', syncCallToPut);
+    };
+  }, [groupedOptions]);
 
   if (isLoading) {
     return (
@@ -111,12 +189,16 @@ export function OptionChainTab() {
     );
   }
 
+  const symbolName = selectedSymbol ? getSymbolName(selectedSymbol) : '';
+  const daysUntilExpiration = data?.[0]?.expire_date ? calculateDaysUntilExpiration(data[0].expire_date) : 0;
+  const maturity = data?.[0]?.mature || 0;
+
   return (
     <Card dir="rtl">
         <CardHeader className="flex-col md:flex-row justify-between items-start md:items-center">
             <div>
-                <CardTitle>{`زنجیره اختیار معامله برای ${selectedSymbol}`}</CardTitle>
-                <CardDescription>{`تاریخ سررسید: ${selectedDate} - تعداد کل قراردادها: ${data[0].options.length}`}</CardDescription>
+                <CardTitle>{`زنجیره اختیار معامله برای ${symbolName}`}</CardTitle>
+                <CardDescription>{`تاریخ سررسید: ${selectedDate} - ${maturity} روز تا سررسید - تعداد کل قراردادها: ${data[0].options.length}`}</CardDescription>
             </div>
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -143,39 +225,91 @@ export function OptionChainTab() {
         </CardHeader>
         <CardContent>
           {/* Desktop View */}
-          <ScrollArea className="h-[75vh] w-full hidden md:block" type="auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {visiblePutColumns.map(col => <TableHead key={`put-header-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
-                  <TableHead className="text-center font-bold sticky right-0 left-0 bg-muted z-20">قیمت اعمال</TableHead>
-                  {visibleCallColumns.map(col => <TableHead key={`call-header-${col.accessor}`} className="text-right">{col.header}</TableHead>)}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Array.from(groupedOptions.keys()).map(strike => (
-                  <TableRow key={`desktop-row-${strike}`}>
-                    {/* Puts */}
-                    {visiblePutColumns.map(col => (
-                      <TableCell key={`put-cell-${strike}-${col.accessor}`} className="text-right text-xs">
-                        {groupedOptions.get(strike)?.put ? formatValue((groupedOptions.get(strike)!.put as any)[col.accessor]) : '-'}
-                      </TableCell>
-                    ))}
-                    {/* Strike */}
-                    <TableCell className="font-semibold text-center bg-muted sticky right-0 left-0 z-10">
-                      {strike.toLocaleString('fa-IR')}
-                    </TableCell>
-                    {/* Calls */}
-                    {visibleCallColumns.map(col => (
-                      <TableCell key={`call-cell-${strike}-${col.accessor}`} className="text-right text-xs">
-                        {groupedOptions.get(strike)?.call ? formatValue((groupedOptions.get(strike)!.call as any)[col.accessor]) : '-'}
-                      </TableCell>
+          <div className="w-full hidden md:flex items-start gap-3" dir="rtl">
+            {/* Put table - horizontally scrollable */}
+            <div ref={putScrollRef} className="flex-1 overflow-x-auto overflow-y-visible">
+              <Table className="min-w-max">
+                <TableHeader>
+                  <TableRow>
+                    {visiblePutColumnsOrdered.map((col, index) => (
+                      <TableHead
+                        key={`put-header-${col.accessor}`}
+                        className={`text-right whitespace-nowrap ${col.accessor === 'l18' ? 'sticky right-0 z-20 bg-background' : ''}`}
+                      >
+                        {col.header}
+                      </TableHead>
                     ))}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </ScrollArea>
+                </TableHeader>
+                <TableBody>
+                  {Array.from(groupedOptions.keys()).map(strike => (
+                    <TableRow key={`desktop-put-row-${strike}`}>
+                      {visiblePutColumnsOrdered.map((col, index) => (
+                        <TableCell
+                          key={`put-cell-${strike}-${col.accessor}`}
+                          className={`text-right text-xs whitespace-nowrap ${col.accessor === 'l18' ? 'sticky right-0 z-10 bg-background' : ''}`}
+                        >
+                          {groupedOptions.get(strike)?.put ? formatValue((groupedOptions.get(strike)!.put as any)[col.accessor]) : '-'}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Strike prices - fixed center column */}
+            <div className="shrink-0 w-36">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="text-center font-bold whitespace-nowrap">قیمت اعمال</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from(groupedOptions.keys()).map(strike => (
+                    <TableRow key={`desktop-strike-row-${strike}`}>
+                      <TableCell className="font-semibold text-center bg-muted whitespace-nowrap">
+                        {strike.toLocaleString('fa-IR')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Call table - horizontally scrollable */}
+            <div ref={callScrollRef} className="flex-1 overflow-x-auto overflow-y-visible">
+              <Table className="min-w-max">
+                <TableHeader>
+                  <TableRow>
+                    {visibleCallColumnsOrdered.map((col, index) => (
+                      <TableHead
+                        key={`call-header-${col.accessor}`}
+                        className={`text-right whitespace-nowrap ${col.accessor === 'l18' ? 'sticky left-0 z-20 bg-background' : ''}`}
+                      >
+                        {col.header}
+                      </TableHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {Array.from(groupedOptions.keys()).map(strike => (
+                    <TableRow key={`desktop-call-row-${strike}`}>
+                      {visibleCallColumnsOrdered.map((col, index) => (
+                        <TableCell
+                          key={`call-cell-${strike}-${col.accessor}`}
+                          className={`text-right text-xs whitespace-nowrap ${col.accessor === 'l18' ? 'sticky left-0 z-10 bg-background' : ''}`}
+                        >
+                          {groupedOptions.get(strike)?.call ? formatValue((groupedOptions.get(strike)!.call as any)[col.accessor]) : '-'}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
 
           {/* Mobile View */}
           <ScrollArea className="h-[75vh] w-full md:hidden" type="auto">
